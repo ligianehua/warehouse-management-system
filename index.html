@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>仓储管理系统 / Warehouse Management System</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --primary: #2c3e6b;
+  --primary-light: #3a5199;
+  --primary-dark: #1e2d4f;
+  --accent-red: #e74c3c;
+  --accent-green: #27ae60;
+  --accent-orange: #f39c12;
+  --accent-blue: #3498db;
+  --bg: #f0f2f5;
+  --card: #ffffff;
+  --text: #2c3e50;
+  --text-light: #7f8c8d;
+  --border: #e8e8e8;
+  --sidebar-w: 240px;
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ===== AUTH PAGES ===== */
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1a2332 0%, var(--primary) 50%, var(--primary-light) 100%);
+  padding: 20px;
+}
+.auth-box {
+  background: white;
+  border-radius: 20px;
+  padding: 40px 32px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+.auth-logo {
+  text-align: center;
+  margin-bottom: 28px;
+}
+.auth-logo .logo-icon { font-size: 48px; margin-bottom: 8px; }
+.auth-logo h2 { font-size: 22px; color: var(--primary); }
+.auth-logo p { font-size: 13px; color: var(--text-light); margin-top: 4px; }
+.auth-tabs {
+  display: flex;
+  margin-bottom: 24px;
+  border-bottom: 2px solid var(--border);
+}
+.auth-tab {
+  flex: 1;
+  padding: 12px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-light);
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.2s;
+}
+.auth-tab.active { color: var(--primary); }
+.auth-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 20%;
+  width: 60%;
+  height: 2px;
+  background: var(--primary);
+}
+.auth-form { display: none; }
+.auth-form.active { display: block; }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+.form-group input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+  transition: border 0.2s;
+}
+.form-group input:focus { border-color: var(--primary); }
+.auth-btn {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  margin-top: 8px;
+}
+.auth-btn:hover { opacity: 0.9; }
+.auth-error {
+  color: var(--accent-red);
+  font-size: 13px;
+  margin-top: 8px;
+  display: none;
+}
+.auth-footer {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 12px;
+  color: var(--text-light);
+}
+
+/* ===== APP LAYOUT ===== */
+.app-container { display: none; min-height: 100vh; }
+.app-container.active { display: flex; }
+
+/* Sidebar (desktop) */
+.sidebar {
+  display: none;
+  width: var(--sidebar-w);
+  background: linear-gradient(180deg, #1a2332 0%, var(--primary-dark) 100%);
+  color: white;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 200;
+  overflow-y: auto;
+  flex-direction: column;
+}
+.sidebar-logo {
+  padding: 24px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sidebar-logo .s-icon { font-size: 28px; }
+.sidebar-logo .s-text { font-size: 16px; font-weight: 600; }
+.sidebar-nav { padding: 12px 0; flex: 1; }
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  font-size: 14px;
+  color: rgba(255,255,255,0.6);
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+.sidebar-item:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.9); }
+.sidebar-item.active {
+  background: rgba(255,255,255,0.12);
+  color: white;
+  border-left: 3px solid var(--accent-blue);
+}
+.sidebar-item .si-icon { font-size: 20px; width: 24px; text-align: center; }
+.sidebar-user {
+  padding: 16px 20px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.sidebar-user .su-info { font-size: 13px; }
+.sidebar-user .su-name { font-weight: 600; }
+.sidebar-user .su-role { font-size: 11px; color: rgba(255,255,255,0.5); }
+.logout-btn {
+  background: rgba(255,255,255,0.1);
+  border: none;
+  color: rgba(255,255,255,0.7);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.logout-btn:hover { background: rgba(231,76,60,0.3); color: white; }
+
+/* Main area */
+.main-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding-bottom: 70px;
+}
+
+/* Header */
+.header {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  color: white;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header h1 { font-size: 18px; font-weight: 600; }
+.header-left { display: flex; align-items: center; gap: 10px; }
+.header-actions { display: flex; gap: 10px; align-items: center; }
+.header-btn {
+  background: rgba(255,255,255,0.2);
+  border: none;
+  color: white;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+.header-btn:hover { background: rgba(255,255,255,0.3); }
+.header-btn.green { background: var(--accent-green); }
+.header-btn.green:hover { background: #219a52; }
+.mobile-logout {
+  background: rgba(231,76,60,0.3);
+  border: none;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* Bottom Navigation (mobile/tablet) */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(135deg, #1a2332 0%, #2c3e6b 100%);
+  display: flex;
+  justify-content: space-around;
+  padding: 8px 0 12px;
+  z-index: 100;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+  color: rgba(255,255,255,0.5);
+  font-size: 10px;
+  padding: 4px 6px;
+  border-radius: 8px;
+  transition: all 0.3s;
+  position: relative;
+  border: none;
+  background: none;
+}
+.nav-item.active { color: white; }
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 3px;
+  background: var(--accent-red);
+  border-radius: 2px;
+}
+.nav-item .nav-icon { font-size: 20px; }
+
+/* Pages */
+.page { display: none; padding: 16px; max-width: 1400px; margin: 0 auto; width: 100%; }
+.page.active { display: block; }
+
+/* Cards */
+.card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+/* Dashboard Grid */
+.dash-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.dash-card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  position: relative;
+  overflow: hidden;
+}
+.dash-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+.dash-card .label { font-size: 13px; color: var(--text-light); }
+.dash-card .value { font-size: 28px; font-weight: 700; margin-top: 4px; }
+.dash-card .icon { position: absolute; top: 12px; right: 12px; font-size: 28px; }
+.dash-card .value.red { color: var(--accent-red); }
+.dash-card .value.green { color: var(--accent-green); }
+.dash-card .value.orange { color: var(--accent-orange); }
+.dash-card .value.blue { color: var(--accent-blue); }
+
+/* Financial Section */
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 20px 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-title .line { flex: 1; height: 1px; background: var(--border); }
+.finance-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.finance-card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 14px 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.finance-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+.finance-card .f-icon { font-size: 32px; margin-bottom: 6px; }
+.finance-card .f-label { font-size: 12px; color: var(--text-light); margin-bottom: 4px; }
+.finance-card .f-value { font-size: 18px; font-weight: 700; }
+.finance-card.profit .f-value { color: var(--accent-green); }
+.finance-card.sales .f-value { color: var(--accent-blue); }
+.finance-card.purchase .f-value { color: var(--accent-orange); }
+
+.chart-row { display: grid; grid-template-columns: 1fr; gap: 12px; }
+
+.chart-preview {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.chart-preview:hover { transform: translateY(-2px); }
+.chart-preview canvas { width: 100% !important; height: 180px !important; }
+.chart-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.chart-title .more { font-size: 12px; color: var(--accent-blue); }
+
+.welcome-card {
+  background: linear-gradient(135deg, #f8f9ff 0%, #e8ecff 100%);
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.welcome-card .w-title { font-size: 14px; color: var(--text); }
+.welcome-card .w-title b { color: var(--primary); }
+.welcome-card .w-sub { font-size: 12px; color: var(--text-light); margin-top: 4px; }
+
+/* Search & Tables */
+.search-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  align-items: center;
+}
+.search-bar input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: border 0.2s;
+}
+.search-bar input:focus { border-color: var(--primary); }
+.table-wrapper { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th {
+  background: #f7f8fa;
+  padding: 10px 8px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-light);
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+td {
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.no-data { text-align: center; padding: 40px; color: var(--text-light); font-size: 14px; }
+
+/* Tabs */
+.tabs { display: flex; gap: 0; margin-bottom: 16px; }
+.tab {
+  padding: 10px 20px;
+  font-size: 14px;
+  cursor: pointer;
+  border: none;
+  background: #e8e8e8;
+  color: var(--text-light);
+  transition: all 0.2s;
+}
+.tab:first-child { border-radius: 8px 0 0 8px; }
+.tab:last-child { border-radius: 0 8px 8px 0; }
+.tab.active { background: var(--primary); color: white; }
+
+/* Filters */
+.filters {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.filter-group label { font-size: 13px; font-weight: 600; display: block; margin-bottom: 4px; }
+.filter-group select, .filter-group input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  background: white;
+}
+
+/* Scan Page */
+.scan-area { text-align: center; padding: 20px; }
+.scan-icon { font-size: 64px; margin-bottom: 12px; }
+.scan-text { font-size: 14px; color: var(--text-light); margin-bottom: 16px; }
+.scan-btn {
+  display: block;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto 16px;
+  padding: 14px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.scan-btn:hover { background: var(--primary-light); }
+.scan-divider {
+  color: var(--text-light);
+  font-size: 13px;
+  margin: 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.scan-divider::before, .scan-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.manual-input {
+  display: flex;
+  gap: 8px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+.manual-input input { flex: 1; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; outline: none; }
+.manual-input button {
+  padding: 12px 16px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/* Finance Detail */
+.finance-page .stat-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.stat-box {
+  background: var(--card);
+  border-radius: 10px;
+  padding: 14px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+.stat-box .s-label { font-size: 11px; color: var(--text-light); }
+.stat-box .s-value { font-size: 20px; font-weight: 700; margin-top: 4px; }
+.stat-box.green .s-value { color: var(--accent-green); }
+.stat-box.blue .s-value { color: var(--accent-blue); }
+.stat-box.orange .s-value { color: var(--accent-orange); }
+.stat-box.red .s-value { color: var(--accent-red); }
+
+.detail-chart {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.detail-chart canvas { width: 100% !important; height: 250px !important; }
+.detail-chart h3 { font-size: 15px; margin-bottom: 12px; }
+
+.month-selector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.month-selector button {
+  background: var(--primary);
+  color: white;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.month-selector span { font-size: 16px; font-weight: 600; min-width: 120px; text-align: center; }
+
+.back-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+  display: none;
+}
+
+/* Data rows */
+.data-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+.data-row:last-child { border-bottom: none; }
+.data-row .dr-label { color: var(--text-light); }
+.data-row .dr-value { font-weight: 600; }
+
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.badge.pending { background: #fff3e0; color: #e67e22; }
+.badge.completed { background: #e8f5e9; color: #27ae60; }
+.badge.cancelled { background: #ffebee; color: #e74c3c; }
+
+.action-btns { display: flex; gap: 6px; }
+.action-btn {
+  padding: 4px 10px;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.action-btn.view { background: #e3f2fd; color: #1976d2; }
+.action-btn.edit { background: #fff3e0; color: #f57c00; }
+.action-btn.delete { background: #ffebee; color: #e53935; }
+
+/* Modal */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 300;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 24px;
+}
+.modal h2 { font-size: 18px; margin-bottom: 16px; }
+.modal .form-group { margin-bottom: 14px; }
+.modal .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; color: var(--text-light); }
+.modal .form-group input, .modal .form-group select, .modal .form-group textarea {
+  width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; outline: none;
+}
+.modal .form-group textarea { min-height: 80px; resize: vertical; }
+.modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+.modal-actions button {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.btn-cancel { background: #e8e8e8; color: var(--text); }
+.btn-submit { background: var(--primary); color: white; }
+
+/* ===== TABLET (768px+) ===== */
+@media (min-width: 768px) {
+  .dash-grid { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .finance-cards { gap: 16px; }
+  .finance-card .f-value { font-size: 22px; }
+  .finance-card .f-icon { font-size: 40px; }
+  .chart-row { grid-template-columns: 1fr 1fr; }
+  .chart-preview canvas { height: 200px !important; }
+  .page { padding: 20px 24px; }
+  .header { padding: 16px 24px; }
+  .header h1 { font-size: 20px; }
+  .nav-item { font-size: 11px; }
+  .nav-item .nav-icon { font-size: 22px; }
+  .stat-box .s-value { font-size: 24px; }
+  .detail-chart canvas { height: 300px !important; }
+  .finance-page .stat-row { gap: 16px; }
+  .filters { grid-template-columns: repeat(3, 1fr); }
+  table { font-size: 14px; }
+  th, td { padding: 12px 10px; }
+}
+
+/* ===== DESKTOP (1024px+) ===== */
+@media (min-width: 1024px) {
+  .sidebar { display: flex; }
+  .bottom-nav { display: none; }
+  .main-area { margin-left: var(--sidebar-w); padding-bottom: 0; }
+  .header { padding: 16px 32px; }
+  .page { padding: 24px 32px; }
+  .dash-grid { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .dash-card { padding: 20px; }
+  .dash-card .value { font-size: 32px; }
+  .finance-card { padding: 20px 16px; }
+  .finance-card .f-value { font-size: 26px; }
+  .chart-preview canvas { height: 220px !important; }
+  .detail-chart canvas { height: 350px !important; }
+  .mobile-logout { display: none; }
+  .stat-box { padding: 20px; }
+  .stat-box .s-value { font-size: 28px; }
+}
+
+/* ===== LARGE DESKTOP (1400px+) ===== */
+@media (min-width: 1400px) {
+  .dash-grid { grid-template-columns: repeat(6, 1fr); }
+  .finance-page .stat-row { grid-template-columns: repeat(6, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== AUTH CONTAINER ===== -->
+<div class="auth-container" id="authContainer">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div class="logo-icon">🏭</div>
+      <h2>仓储管理系统</h2>
+      <p>Warehouse Management System</p>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">登录 / Login</button>
+      <button class="auth-tab" onclick="switchAuthTab('register')">注册 / Register</button>
+    </div>
+
+    <!-- Login Form -->
+    <form class="auth-form active" id="loginForm" onsubmit="return handleLogin(event)">
+      <div class="form-group">
+        <label>用户名 / Username</label>
+        <input type="text" id="login-user" placeholder="请输入用户名" required>
+      </div>
+      <div class="form-group">
+        <label>密码 / Password</label>
+        <input type="password" id="login-pass" placeholder="请输入密码" required>
+      </div>
+      <div class="auth-error" id="loginError"></div>
+      <button type="submit" class="auth-btn">登录 / Sign In</button>
+    </form>
+
+    <!-- Register Form -->
+    <form class="auth-form" id="registerForm" onsubmit="return handleRegister(event)">
+      <div class="form-group">
+        <label>用户名 / Username</label>
+        <input type="text" id="reg-user" placeholder="请输入用户名 (3字符以上)" required minlength="3">
+      </div>
+      <div class="form-group">
+        <label>邮箱 / Email</label>
+        <input type="email" id="reg-email" placeholder="请输入邮箱" required>
+      </div>
+      <div class="form-group">
+        <label>密码 / Password</label>
+        <input type="password" id="reg-pass" placeholder="请输入密码 (6字符以上)" required minlength="6">
+      </div>
+      <div class="form-group">
+        <label>确认密码 / Confirm Password</label>
+        <input type="password" id="reg-pass2" placeholder="请再次输入密码" required>
+      </div>
+      <div class="form-group">
+        <label>角色 / Role</label>
+        <select id="reg-role" style="width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;">
+          <option value="owner">管理员 / Owner</option>
+          <option value="staff">员工 / Staff</option>
+        </select>
+      </div>
+      <div class="auth-error" id="regError"></div>
+      <button type="submit" class="auth-btn">注册 / Sign Up</button>
+    </form>
+
+    <div class="auth-footer">
+      &copy; 2026 仓储管理系统 v1.0
+    </div>
+  </div>
+</div>
+
+<!-- ===== APP CONTAINER ===== -->
+<div class="app-container" id="appContainer">
+
+  <!-- Sidebar (Desktop) -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span class="s-icon">🏭</span>
+      <span class="s-text">仓储管理系统</span>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="sidebar-item active" onclick="navigateTo('dashboard')">
+        <span class="si-icon">📊</span> 仪表盘 / Dashboard
+      </button>
+      <button class="sidebar-item" onclick="navigateTo('inbound')">
+        <span class="si-icon">📥</span> 入库 / Inbound
+      </button>
+      <button class="sidebar-item" onclick="navigateTo('outbound')">
+        <span class="si-icon">📤</span> 出库 / Outbound
+      </button>
+      <button class="sidebar-item" onclick="navigateTo('inventory')">
+        <span class="si-icon">📁</span> 库存 / Stock
+      </button>
+      <button class="sidebar-item" onclick="navigateTo('scan')">
+        <span class="si-icon">📷</span> 扫码查询 / Scan
+      </button>
+      <button class="sidebar-item" onclick="navigateTo('finance')">
+        <span class="si-icon">💰</span> 财务报表 / Finance
+      </button>
+    </nav>
+    <div class="sidebar-user">
+      <div class="su-info">
+        <div class="su-name" id="sidebarUserName">Admin</div>
+        <div class="su-role" id="sidebarUserRole">owner</div>
+      </div>
+      <button class="logout-btn" onclick="handleLogout()">退出</button>
+    </div>
+  </aside>
+
+  <!-- Main Area -->
+  <div class="main-area">
+    <!-- Header -->
+    <div class="header" id="mainHeader">
+      <div class="header-left">
+        <button class="back-btn" id="backBtn" onclick="goBack()">&#8592;</button>
+        <h1 id="headerTitle">仪表盘 / Dashboard</h1>
+      </div>
+      <div class="header-actions" id="headerActions">
+        <button class="mobile-logout" onclick="handleLogout()">退出</button>
+      </div>
+    </div>
+
+    <!-- PAGE: Dashboard -->
+    <div class="page active" id="page-dashboard">
+      <div class="dash-grid">
+        <div class="dash-card" onclick="navigateTo('inventory')">
+          <div class="label">商品分类</div>
+          <div class="value" id="stat-categories">3</div>
+          <div class="icon">🏷️</div>
+        </div>
+        <div class="dash-card" onclick="navigateTo('inventory')">
+          <div class="label">商品</div>
+          <div class="value" id="stat-products">12</div>
+          <div class="icon">📦</div>
+        </div>
+        <div class="dash-card">
+          <div class="label">仓库</div>
+          <div class="value" id="stat-warehouses">1</div>
+          <div class="icon">🏭</div>
+        </div>
+        <div class="dash-card" onclick="navigateTo('inbound')">
+          <div class="label">入库单</div>
+          <div class="value green" id="stat-inbound">5</div>
+          <div class="icon">📥</div>
+        </div>
+        <div class="dash-card" onclick="navigateTo('outbound')">
+          <div class="label">出库单</div>
+          <div class="value red" id="stat-outbound">3</div>
+          <div class="icon">📤</div>
+        </div>
+        <div class="dash-card">
+          <div class="label">补货预警</div>
+          <div class="value orange" id="stat-alerts">2</div>
+          <div class="icon">⚠️</div>
+        </div>
+      </div>
+
+      <div class="section-title">
+        📊 本月财务概览 / Monthly Finance
+        <span class="line"></span>
+      </div>
+      <div class="finance-cards">
+        <div class="finance-card profit" onclick="navigateTo('finance')">
+          <div class="f-icon">💰</div>
+          <div class="f-label">每月利润 / Profit</div>
+          <div class="f-value" id="dash-profit">¥18,500</div>
+        </div>
+        <div class="finance-card sales" onclick="navigateTo('finance')">
+          <div class="f-icon">📈</div>
+          <div class="f-label">每月销售 / Sales</div>
+          <div class="f-value" id="dash-sales">¥52,300</div>
+        </div>
+        <div class="finance-card purchase" onclick="navigateTo('finance')">
+          <div class="f-icon">🛒</div>
+          <div class="f-label">每月采购 / Purchase</div>
+          <div class="f-value" id="dash-purchase">¥33,800</div>
+        </div>
+      </div>
+
+      <div class="chart-row">
+        <div class="chart-preview" onclick="navigateTo('finance')">
+          <div class="chart-title">近6个月利润趋势 / 6-Month Profit Trend<span class="more">查看详情 &rarr;</span></div>
+          <canvas id="miniProfitChart"></canvas>
+        </div>
+        <div class="chart-preview" onclick="navigateTo('finance')">
+          <div class="chart-title">销售 vs 采购 / Sales vs Purchase<span class="more">查看详情 &rarr;</span></div>
+          <canvas id="miniSalesChart"></canvas>
+        </div>
+      </div>
+
+      <div class="welcome-card">
+        <div class="w-title">欢迎 / Welcome, <b id="welcomeUser">Admin</b> (<span id="welcomeRole">owner</span>)</div>
+        <div class="w-sub">💡 点击上方卡片查看详情 / Click cards above for details</div>
+      </div>
+    </div>
+
+    <!-- PAGE: Inbound -->
+    <div class="page" id="page-inbound">
+      <div class="card">
+        <div class="search-bar">
+          <span style="font-size:18px">🔍</span>
+          <span style="font-weight:600;font-size:14px">搜索ID</span>
+        </div>
+        <input type="text" placeholder="输入ID搜索..." style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;outline:none;margin-bottom:16px;" id="inboundSearch" oninput="renderInbound()">
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>单号</th><th>仓库</th><th>状态</th><th>经手人</th><th>入库日期</th><th>操作</th></tr></thead>
+            <tbody id="inboundTable"></tbody>
+          </table>
+        </div>
+        <div class="no-data" id="inboundNoData" style="display:none">暂无数据 / No data</div>
+      </div>
+    </div>
+
+    <!-- PAGE: Outbound -->
+    <div class="page" id="page-outbound">
+      <div class="tabs">
+        <button class="tab active" onclick="switchOutTab('out')">出库单</button>
+        <button class="tab" onclick="switchOutTab('delivery')">送货单</button>
+      </div>
+      <div class="card" id="outTab-out">
+        <div class="search-bar">
+          <span style="font-size:18px">🔍</span>
+          <span style="font-weight:600;font-size:14px">搜索ID</span>
+        </div>
+        <input type="text" placeholder="输入ID..." style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;outline:none;margin-bottom:16px;">
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>单号</th><th>仓库</th><th>状态</th><th>经手人</th><th>出库日期</th><th>操作</th></tr></thead>
+            <tbody id="outboundTable"></tbody>
+          </table>
+        </div>
+        <div class="no-data" id="outboundNoData" style="display:none">暂无数据 / No data</div>
+      </div>
+      <div class="card" id="outTab-delivery" style="display:none">
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>单号</th><th>客户</th><th>状态</th><th>经手人</th><th>送货日期</th><th>操作</th></tr></thead>
+            <tbody id="deliveryTable"></tbody>
+          </table>
+        </div>
+        <div class="no-data" id="deliveryNoData" style="display:none">暂无数据 / No data</div>
+      </div>
+    </div>
+
+    <!-- PAGE: Inventory -->
+    <div class="page" id="page-inventory">
+      <div class="tabs">
+        <button class="tab active" onclick="switchInvTab('balances')">库存余额 / Balances</button>
+        <button class="tab" onclick="switchInvTab('movements')">库存变动 / Movements</button>
+      </div>
+      <div class="card" id="invTab-balances">
+        <div class="filters">
+          <div class="filter-group">
+            <label>商品筛选 / Product</label>
+            <select><option>-- 请选择 / Select --</option></select>
+          </div>
+          <div class="filter-group">
+            <label>仓库筛选 / Warehouse</label>
+            <select><option>-- 请选择 / Select --</option><option>主仓库</option></select>
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>SKU</th><th>名称/Name</th><th>颜色/Color</th><th>仓库</th><th>库位</th><th>在手量</th></tr></thead>
+            <tbody id="balanceTable"></tbody>
+          </table>
+        </div>
+        <div class="no-data" id="balanceNoData" style="display:none">暂无数据 / No data</div>
+      </div>
+      <div class="card" id="invTab-movements" style="display:none">
+        <div class="filters">
+          <div class="filter-group">
+            <label>类型 / Type</label>
+            <select><option>全部 / All</option><option>入库</option><option>出库</option></select>
+          </div>
+          <div class="filter-group">
+            <label>日期 / Date</label>
+            <input type="date">
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>日期</th><th>SKU</th><th>类型</th><th>数量</th><th>经手人</th></tr></thead>
+            <tbody id="movementTable"></tbody>
+          </table>
+        </div>
+        <div class="no-data" id="movementNoData" style="display:none">暂无数据 / No data</div>
+      </div>
+    </div>
+
+    <!-- PAGE: Scan -->
+    <div class="page" id="page-scan">
+      <div class="card">
+        <div class="scan-area">
+          <div class="scan-icon">📷</div>
+          <div class="scan-text">将摄像头对准商品条码或SKU码</div>
+          <button class="scan-btn" onclick="alert('摄像头功能需要在HTTPS环境下使用')">📸 开启摄像头扫码</button>
+          <div class="scan-divider">或手动输入</div>
+          <div class="manual-input">
+            <input type="text" placeholder="输入SKU或条码后按回车" id="scanInput" onkeydown="if(event.key==='Enter')searchSKU()">
+            <button onclick="searchSKU()">🔍</button>
+          </div>
+        </div>
+      </div>
+      <div class="card" id="scanResult" style="display:none">
+        <h3 style="margin-bottom:12px">查询结果 / Result</h3>
+        <div id="scanResultContent"></div>
+      </div>
+    </div>
+
+    <!-- PAGE: Finance Detail -->
+    <div class="page finance-page" id="page-finance">
+      <div class="month-selector">
+        <button onclick="changeMonth(-1)">&#8592;</button>
+        <span id="currentMonth">2026年3月</span>
+        <button onclick="changeMonth(1)">&#8594;</button>
+      </div>
+      <div class="stat-row">
+        <div class="stat-box green"><div class="s-label">本月利润 / Profit</div><div class="s-value" id="f-profit">¥18,500</div></div>
+        <div class="stat-box blue"><div class="s-label">本月销售 / Sales</div><div class="s-value" id="f-sales">¥52,300</div></div>
+        <div class="stat-box orange"><div class="s-label">本月采购 / Purchase</div><div class="s-value" id="f-purchase">¥33,800</div></div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-box"><div class="s-label">利润率 / Margin</div><div class="s-value" style="color:var(--accent-green)" id="f-margin">35.4%</div></div>
+        <div class="stat-box"><div class="s-label">订单数 / Orders</div><div class="s-value" style="color:var(--primary)" id="f-orders">28</div></div>
+        <div class="stat-box red"><div class="s-label">退货额 / Returns</div><div class="s-value" id="f-returns">¥1,200</div></div>
+      </div>
+      <div class="chart-row">
+        <div class="detail-chart">
+          <h3>📊 每日销售趋势 / Daily Sales Trend</h3>
+          <canvas id="dailySalesChart"></canvas>
+        </div>
+        <div class="detail-chart">
+          <h3>💰 利润 vs 销售 vs 采购</h3>
+          <canvas id="comparisonChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-row">
+        <div class="detail-chart">
+          <h3>📦 采购分类占比 / Purchase by Category</h3>
+          <canvas id="purchasePieChart"></canvas>
+        </div>
+        <div class="detail-chart">
+          <h3>📋 月度财务明细 / Monthly Details</h3>
+          <div class="data-row"><span class="dr-label">总销售额</span><span class="dr-value" id="fd-sales">¥52,300</span></div>
+          <div class="data-row"><span class="dr-label">总采购成本</span><span class="dr-value" id="fd-purchase">¥33,800</span></div>
+          <div class="data-row"><span class="dr-label">运营费用</span><span class="dr-value" id="fd-opex">¥0</span></div>
+          <div class="data-row"><span class="dr-label">退货金额</span><span class="dr-value" id="fd-returns">¥1,200</span></div>
+          <div class="data-row"><span class="dr-label">净利润</span><span class="dr-value" style="color:var(--accent-green);font-size:18px" id="fd-profit">¥18,500</span></div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /main-area -->
+</div><!-- /app-container -->
+
+<!-- Modal: New Inbound -->
+<div class="modal-overlay" id="modal-inbound">
+  <div class="modal">
+    <h2>📥 新建入库单</h2>
+    <div class="form-group"><label>仓库</label><select id="in-warehouse"><option>主仓库</option></select></div>
+    <div class="form-group"><label>商品SKU</label><input type="text" id="in-sku" placeholder="输入商品SKU"></div>
+    <div class="form-group"><label>数量</label><input type="number" id="in-qty" placeholder="输入数量" min="1"></div>
+    <div class="form-group"><label>采购单价</label><input type="number" id="in-cost" placeholder="输入单价" step="0.01"></div>
+    <div class="form-group"><label>经手人</label><input type="text" id="in-handler" placeholder="输入经手人"></div>
+    <div class="form-group"><label>备注</label><textarea id="in-notes" placeholder="备注信息"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('inbound')">取消</button>
+      <button class="btn-submit" onclick="submitInbound()">确认入库</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: New Outbound -->
+<div class="modal-overlay" id="modal-outbound">
+  <div class="modal">
+    <h2>📤 新建出库单</h2>
+    <div class="form-group"><label>仓库</label><select id="out-warehouse"><option>主仓库</option></select></div>
+    <div class="form-group"><label>商品SKU</label><input type="text" id="out-sku" placeholder="输入商品SKU"></div>
+    <div class="form-group"><label>数量</label><input type="number" id="out-qty" placeholder="输入数量" min="1"></div>
+    <div class="form-group"><label>销售单价</label><input type="number" id="out-price" placeholder="输入单价" step="0.01"></div>
+    <div class="form-group"><label>经手人</label><input type="text" id="out-handler" placeholder="输入经手人"></div>
+    <div class="form-group"><label>备注</label><textarea id="out-notes" placeholder="备注信息"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('outbound')">取消</button>
+      <button class="btn-submit" onclick="submitOutbound()">确认出库</button>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom Navigation (mobile/tablet) -->
+<div class="bottom-nav" id="bottomNav">
+  <button class="nav-item active" onclick="navigateTo('dashboard')"><span class="nav-icon">📊</span><span>仪表盘</span></button>
+  <button class="nav-item" onclick="navigateTo('inbound')"><span class="nav-icon">📥</span><span>入库</span></button>
+  <button class="nav-item" onclick="navigateTo('outbound')"><span class="nav-icon">📤</span><span>出库</span></button>
+  <button class="nav-item" onclick="navigateTo('inventory')"><span class="nav-icon">📁</span><span>库存</span></button>
+  <button class="nav-item" onclick="navigateTo('scan')"><span class="nav-icon">📷</span><span>扫码查询</span></button>
+</div>
+
+<script>
+// ===== AUTH SYSTEM =====
+const USERS_KEY = 'warehouse_users';
+const SESSION_KEY = 'warehouse_session';
+
+function getUsers() {
+  const raw = localStorage.getItem(USERS_KEY);
+  if (raw) return JSON.parse(raw);
+  // Default admin account
+  const defaults = [{ username: 'admin', password: 'admin123', email: 'admin@example.com', role: 'owner', created: '2026-01-01' }];
+  localStorage.setItem(USERS_KEY, JSON.stringify(defaults));
+  return defaults;
+}
+function saveUsers(users) { localStorage.setItem(USERS_KEY, JSON.stringify(users)); }
+function getSession() { const s = localStorage.getItem(SESSION_KEY); return s ? JSON.parse(s) : null; }
+function setSession(user) { localStorage.setItem(SESSION_KEY, JSON.stringify({ username: user.username, role: user.role, email: user.email })); }
+function clearSession() { localStorage.removeItem(SESSION_KEY); }
+
+function switchAuthTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach((t, i) => t.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'register')));
+  document.getElementById('loginForm').classList.toggle('active', tab === 'login');
+  document.getElementById('registerForm').classList.toggle('active', tab === 'register');
+  document.querySelectorAll('.auth-error').forEach(e => e.style.display = 'none');
+}
+
+function handleLogin(e) {
+  e.preventDefault();
+  const username = document.getElementById('login-user').value.trim();
+  const password = document.getElementById('login-pass').value;
+  const users = getUsers();
+  const user = users.find(u => u.username === username && u.password === password);
+  if (!user) {
+    const err = document.getElementById('loginError');
+    err.textContent = '用户名或密码错误 / Invalid credentials';
+    err.style.display = 'block';
+    return false;
+  }
+  setSession(user);
+  showApp();
+  return false;
+}
+
+function handleRegister(e) {
+  e.preventDefault();
+  const username = document.getElementById('reg-user').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const password = document.getElementById('reg-pass').value;
+  const password2 = document.getElementById('reg-pass2').value;
+  const role = document.getElementById('reg-role').value;
+  const errEl = document.getElementById('regError');
+
+  if (password !== password2) {
+    errEl.textContent = '两次密码不一致 / Passwords do not match';
+    errEl.style.display = 'block';
+    return false;
+  }
+  const users = getUsers();
+  if (users.find(u => u.username === username)) {
+    errEl.textContent = '用户名已存在 / Username exists';
+    errEl.style.display = 'block';
+    return false;
+  }
+  const newUser = { username, password, email, role, created: new Date().toISOString().split('T')[0] };
+  users.push(newUser);
+  saveUsers(users);
+  setSession(newUser);
+  showApp();
+  return false;
+}
+
+function handleLogout() {
+  clearSession();
+  showAuth();
+}
+
+function showAuth() {
+  document.getElementById('authContainer').style.display = 'flex';
+  document.getElementById('appContainer').classList.remove('active');
+  document.getElementById('bottomNav').style.display = 'none';
+}
+
+function showApp() {
+  const session = getSession();
+  if (!session) return showAuth();
+  document.getElementById('authContainer').style.display = 'none';
+  document.getElementById('appContainer').classList.add('active');
+  document.getElementById('bottomNav').style.display = '';
+  document.getElementById('welcomeUser').textContent = session.username;
+  document.getElementById('welcomeRole').textContent = session.role;
+  document.getElementById('sidebarUserName').textContent = session.username;
+  document.getElementById('sidebarUserRole').textContent = session.role;
+  navigateTo('dashboard');
+}
+
+// ===== DATA STORE =====
+const STORAGE_KEY = 'warehouse_data';
+function getStore() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (raw) return JSON.parse(raw);
+  const defaultData = {
+    inboundOrders: [
+      { id:'IN-20260301', warehouse:'主仓库', status:'completed', handler:'Admin', date:'2026-03-01', sku:'SKU-001', qty:50, cost:120, notes:'首批采购' },
+      { id:'IN-20260305', warehouse:'主仓库', status:'completed', handler:'Admin', date:'2026-03-05', sku:'SKU-002', qty:30, cost:85, notes:'' },
+      { id:'IN-20260308', warehouse:'主仓库', status:'completed', handler:'张三', date:'2026-03-08', sku:'SKU-003', qty:100, cost:45, notes:'补货' },
+      { id:'IN-20260310', warehouse:'主仓库', status:'pending', handler:'李四', date:'2026-03-10', sku:'SKU-001', qty:20, cost:118, notes:'' },
+      { id:'IN-20260312', warehouse:'主仓库', status:'completed', handler:'Admin', date:'2026-03-12', sku:'SKU-004', qty:60, cost:200, notes:'' },
+    ],
+    outboundOrders: [
+      { id:'OUT-20260302', warehouse:'主仓库', status:'completed', handler:'Admin', date:'2026-03-02', sku:'SKU-001', qty:10, price:199, notes:'' },
+      { id:'OUT-20260306', warehouse:'主仓库', status:'completed', handler:'张三', date:'2026-03-06', sku:'SKU-002', qty:15, price:149, notes:'' },
+      { id:'OUT-20260309', warehouse:'主仓库', status:'pending', handler:'Admin', date:'2026-03-09', sku:'SKU-003', qty:40, price:89, notes:'' },
+    ],
+    deliveryOrders: [
+      { id:'DL-20260303', customer:'客户A', status:'completed', handler:'Admin', date:'2026-03-03', notes:'' },
+    ],
+    products: [
+      { sku:'SKU-001', name:'蓝牙耳机', color:'黑色', category:'电子产品' },
+      { sku:'SKU-002', name:'手机壳', color:'透明', category:'配件' },
+      { sku:'SKU-003', name:'USB数据线', color:'白色', category:'配件' },
+      { sku:'SKU-004', name:'充电宝', color:'银色', category:'电子产品' },
+    ],
+    monthlyData: {
+      '2025-10':{ sales:38200, purchase:25600, returns:800, opex:0, orders:20 },
+      '2025-11':{ sales:41500, purchase:28300, returns:600, opex:0, orders:22 },
+      '2025-12':{ sales:48900, purchase:31200, returns:1500, opex:0, orders:25 },
+      '2026-01':{ sales:44300, purchase:29800, returns:900, opex:0, orders:23 },
+      '2026-02':{ sales:46700, purchase:30500, returns:700, opex:0, orders:24 },
+      '2026-03':{ sales:52300, purchase:33800, returns:1200, opex:0, orders:28 },
+    }
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultData));
+  return defaultData;
+}
+function saveStore(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+
+// ===== NAVIGATION =====
+let currentPage = 'dashboard';
+let pageHistory = [];
+const pageTitles = {
+  dashboard:'仪表盘 / Dashboard', inbound:'入库单', outbound:'出库单',
+  inventory:'库存 / Stock', scan:'扫码查询', finance:'📊 财务报表 / Finance'
+};
+const pageActions = {
+  inbound: '<button class="header-btn" onclick="openModal(\'inbound\')">+ 新建入库单</button>',
+  outbound: '<button class="header-btn" onclick="openModal(\'outbound\')">+ 新建出库单</button><button class="header-btn green">📄 送货单</button>',
+};
+
+function navigateTo(page) {
+  if (page === currentPage && page !== 'dashboard') return;
+  if (currentPage !== page) pageHistory.push(currentPage);
+  currentPage = page;
+  showPage();
+}
+function goBack() {
+  if (pageHistory.length > 0) { currentPage = pageHistory.pop(); showPage(); }
+}
+
+function showPage() {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const el = document.getElementById('page-' + currentPage);
+  if (el) el.classList.add('active');
+
+  document.getElementById('headerTitle').textContent = pageTitles[currentPage] || '';
+  const mobileLogout = '<button class="mobile-logout" onclick="handleLogout()">退出</button>';
+  document.getElementById('headerActions').innerHTML = (pageActions[currentPage] || '') + mobileLogout;
+  document.getElementById('backBtn').style.display = (currentPage === 'finance') ? 'block' : 'none';
+
+  // Bottom nav active
+  const pages = ['dashboard','inbound','outbound','inventory','scan'];
+  document.querySelectorAll('.bottom-nav .nav-item').forEach((n, i) => n.classList.toggle('active', pages[i] === currentPage));
+  // Sidebar active
+  document.querySelectorAll('.sidebar-item').forEach(s => {
+    const text = s.textContent.toLowerCase();
+    const map = { dashboard:'仪表盘', inbound:'入库', outbound:'出库', inventory:'库存', scan:'扫码', finance:'财务' };
+    s.classList.toggle('active', text.includes(map[currentPage] || '---'));
+  });
+
+  window.scrollTo(0, 0);
+  if (currentPage === 'dashboard') renderDashboard();
+  if (currentPage === 'inbound') renderInbound();
+  if (currentPage === 'outbound') renderOutbound();
+  if (currentPage === 'inventory') renderInventory();
+  if (currentPage === 'finance') renderFinance();
+}
+
+// ===== RENDER FUNCTIONS =====
+function renderDashboard() {
+  const data = getStore();
+  document.getElementById('stat-inbound').textContent = data.inboundOrders.length;
+  document.getElementById('stat-outbound').textContent = data.outboundOrders.length;
+  document.getElementById('stat-products').textContent = data.products.length;
+  const cats = new Set(data.products.map(p => p.category));
+  document.getElementById('stat-categories').textContent = cats.size;
+  const md = data.monthlyData['2026-03'] || { sales:0, purchase:0 };
+  const profit = md.sales - md.purchase - (md.opex||0);
+  document.getElementById('dash-profit').textContent = '¥' + profit.toLocaleString();
+  document.getElementById('dash-sales').textContent = '¥' + md.sales.toLocaleString();
+  document.getElementById('dash-purchase').textContent = '¥' + md.purchase.toLocaleString();
+  renderMiniCharts(data);
+}
+
+let miniChart1, miniChart2;
+function renderMiniCharts(data) {
+  const months = ['2025-10','2025-11','2025-12','2026-01','2026-02','2026-03'];
+  const labels = ['10月','11月','12月','1月','2月','3月'];
+  const profits = months.map(m => { const d = data.monthlyData[m]||{sales:0,purchase:0,opex:0}; return d.sales-d.purchase-(d.opex||0); });
+  const sales = months.map(m => (data.monthlyData[m]||{}).sales||0);
+  const purchases = months.map(m => (data.monthlyData[m]||{}).purchase||0);
+
+  if(miniChart1)miniChart1.destroy();
+  miniChart1 = new Chart(document.getElementById('miniProfitChart').getContext('2d'),{
+    type:'line', data:{ labels, datasets:[{ label:'利润', data:profits, borderColor:'#27ae60', backgroundColor:'rgba(39,174,96,0.1)', fill:true, tension:0.4, pointRadius:4, pointBackgroundColor:'#27ae60' }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ y:{ticks:{callback:v=>'¥'+(v/1000)+'k'},grid:{color:'#f0f0f0'}}, x:{grid:{display:false}} } }
+  });
+
+  if(miniChart2)miniChart2.destroy();
+  miniChart2 = new Chart(document.getElementById('miniSalesChart').getContext('2d'),{
+    type:'bar', data:{ labels, datasets:[ {label:'销售',data:sales,backgroundColor:'rgba(52,152,219,0.7)',borderRadius:4}, {label:'采购',data:purchases,backgroundColor:'rgba(243,156,18,0.7)',borderRadius:4} ] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'top',labels:{boxWidth:12,font:{size:11}}}}, scales:{ y:{ticks:{callback:v=>'¥'+(v/1000)+'k'},grid:{color:'#f0f0f0'}}, x:{grid:{display:false}} } }
+  });
+}
+
+function renderInbound() {
+  const data = getStore();
+  const search = (document.getElementById('inboundSearch')?.value || '').toLowerCase();
+  let orders = data.inboundOrders;
+  if (search) orders = orders.filter(o => o.id.toLowerCase().includes(search));
+  const tbody = document.getElementById('inboundTable');
+  const noData = document.getElementById('inboundNoData');
+  if (orders.length === 0) { tbody.innerHTML = ''; noData.style.display = 'block'; return; }
+  noData.style.display = 'none';
+  tbody.innerHTML = orders.map((o, i) => `<tr>
+    <td>${o.id}</td><td>${o.warehouse}</td>
+    <td><span class="badge ${o.status}">${o.status==='completed'?'已完成':o.status==='pending'?'待处理':'已取消'}</span></td>
+    <td>${o.handler}</td><td>${o.date}</td>
+    <td><div class="action-btns"><button class="action-btn view" onclick="alert('入库单: ${o.id}\\nSKU: ${o.sku}\\n数量: ${o.qty}\\n单价: ¥${o.cost}')">查看</button><button class="action-btn delete" onclick="deleteInbound(${i})">删除</button></div></td>
+  </tr>`).join('');
+}
+
+function renderOutbound() {
+  const data = getStore();
+  const tbody = document.getElementById('outboundTable');
+  const noData = document.getElementById('outboundNoData');
+  if (data.outboundOrders.length===0){tbody.innerHTML='';noData.style.display='block';}
+  else { noData.style.display='none';
+    tbody.innerHTML = data.outboundOrders.map((o,i)=>`<tr>
+      <td>${o.id}</td><td>${o.warehouse}</td>
+      <td><span class="badge ${o.status}">${o.status==='completed'?'已完成':'待处理'}</span></td>
+      <td>${o.handler}</td><td>${o.date}</td>
+      <td><div class="action-btns"><button class="action-btn view" onclick="alert('出库单: ${o.id}\\nSKU: ${o.sku}\\n数量: ${o.qty}\\n单价: ¥${o.price}')">查看</button><button class="action-btn delete" onclick="deleteOutbound(${i})">删除</button></div></td>
+    </tr>`).join('');
+  }
+  const dtbody = document.getElementById('deliveryTable');
+  const dnoData = document.getElementById('deliveryNoData');
+  if(data.deliveryOrders.length===0){dtbody.innerHTML='';dnoData.style.display='block';}
+  else { dnoData.style.display='none';
+    dtbody.innerHTML = data.deliveryOrders.map(o=>`<tr><td>${o.id}</td><td>${o.customer}</td><td><span class="badge ${o.status}">${o.status==='completed'?'已完成':'待处理'}</span></td><td>${o.handler}</td><td>${o.date}</td><td><button class="action-btn view">查看</button></td></tr>`).join('');
+  }
+}
+
+function renderInventory() {
+  const data = getStore();
+  const balances = {};
+  data.inboundOrders.filter(o=>o.status==='completed').forEach(o=>{if(!balances[o.sku])balances[o.sku]=0;balances[o.sku]+=o.qty;});
+  data.outboundOrders.filter(o=>o.status==='completed').forEach(o=>{if(!balances[o.sku])balances[o.sku]=0;balances[o.sku]-=o.qty;});
+  const tbody = document.getElementById('balanceTable');
+  const noData = document.getElementById('balanceNoData');
+  const rows = data.products.map(p=>({...p,warehouse:'主仓库',location:'A-01',qty:balances[p.sku]||0}));
+  if(rows.length===0){tbody.innerHTML='';noData.style.display='block';}
+  else { noData.style.display='none';
+    tbody.innerHTML = rows.map(r=>`<tr><td>${r.sku}</td><td>${r.name}</td><td>${r.color}</td><td>${r.warehouse}</td><td>${r.location}</td><td style="font-weight:700;${r.qty<10?'color:var(--accent-red)':''}">${r.qty}</td></tr>`).join('');
+  }
+  const mtbody = document.getElementById('movementTable');
+  const mnoData = document.getElementById('movementNoData');
+  const movements = [];
+  data.inboundOrders.forEach(o=>movements.push({date:o.date,sku:o.sku,type:'入库',qty:'+'+o.qty,handler:o.handler}));
+  data.outboundOrders.forEach(o=>movements.push({date:o.date,sku:o.sku,type:'出库',qty:'-'+o.qty,handler:o.handler}));
+  movements.sort((a,b)=>b.date.localeCompare(a.date));
+  if(movements.length===0){mtbody.innerHTML='';mnoData.style.display='block';}
+  else { mnoData.style.display='none';
+    mtbody.innerHTML = movements.map(m=>`<tr><td>${m.date}</td><td>${m.sku}</td><td><span class="badge ${m.type==='入库'?'completed':'pending'}">${m.type}</span></td><td style="font-weight:700;color:${m.type==='入库'?'var(--accent-green)':'var(--accent-red)'}">${m.qty}</td><td>${m.handler}</td></tr>`).join('');
+  }
+}
+
+// ===== FINANCE =====
+let financeMonth = new Date(2026,2);
+let fChart1,fChart2,fChart3;
+function changeMonth(delta){financeMonth.setMonth(financeMonth.getMonth()+delta);renderFinance();}
+
+function renderFinance() {
+  const year=financeMonth.getFullYear(), month=financeMonth.getMonth()+1;
+  document.getElementById('currentMonth').textContent=`${year}年${month}月`;
+  const key=`${year}-${String(month).padStart(2,'0')}`;
+  const data=getStore();
+  const md=data.monthlyData[key]||{sales:0,purchase:0,returns:0,opex:0,orders:0};
+  const profit=md.sales-md.purchase-(md.opex||0);
+  const margin=md.sales>0?((profit/md.sales)*100).toFixed(1):'0.0';
+  document.getElementById('f-profit').textContent='¥'+profit.toLocaleString();
+  document.getElementById('f-sales').textContent='¥'+md.sales.toLocaleString();
+  document.getElementById('f-purchase').textContent='¥'+md.purchase.toLocaleString();
+  document.getElementById('f-margin').textContent=margin+'%';
+  document.getElementById('f-orders').textContent=md.orders;
+  document.getElementById('f-returns').textContent='¥'+(md.returns||0).toLocaleString();
+  document.getElementById('fd-sales').textContent='¥'+md.sales.toLocaleString();
+  document.getElementById('fd-purchase').textContent='¥'+md.purchase.toLocaleString();
+  document.getElementById('fd-opex').textContent='¥'+(md.opex||0).toLocaleString();
+  document.getElementById('fd-returns').textContent='¥'+(md.returns||0).toLocaleString();
+  document.getElementById('fd-profit').textContent='¥'+profit.toLocaleString();
+
+  const daysInMonth=new Date(year,month,0).getDate();
+  const dailyLabels=Array.from({length:daysInMonth},(_,i)=>(i+1)+'日');
+  const dailySales=Array.from({length:daysInMonth},()=>Math.round(md.sales/daysInMonth*(0.5+Math.random())));
+
+  if(fChart1)fChart1.destroy();
+  fChart1=new Chart(document.getElementById('dailySalesChart').getContext('2d'),{
+    type:'line', data:{ labels:dailyLabels, datasets:[{label:'日销售额',data:dailySales,borderColor:'#3498db',backgroundColor:'rgba(52,152,219,0.1)',fill:true,tension:0.3,pointRadius:2}] },
+    options:{ responsive:true,maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{ticks:{callback:v=>'¥'+v},grid:{color:'#f0f0f0'}},x:{grid:{display:false},ticks:{maxTicksLimit:10}}} }
+  });
+
+  const months6=[],labels6=[];
+  for(let i=5;i>=0;i--){const d=new Date(year,month-1-i);const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;months6.push(k);labels6.push(`${d.getMonth()+1}月`);}
+  const sArr=months6.map(m=>(data.monthlyData[m]||{}).sales||0);
+  const pArr=months6.map(m=>(data.monthlyData[m]||{}).purchase||0);
+  const prArr=months6.map(m=>{const d=data.monthlyData[m]||{sales:0,purchase:0,opex:0};return d.sales-d.purchase-(d.opex||0);});
+
+  if(fChart2)fChart2.destroy();
+  fChart2=new Chart(document.getElementById('comparisonChart').getContext('2d'),{
+    type:'bar', data:{ labels:labels6, datasets:[{label:'销售',data:sArr,backgroundColor:'rgba(52,152,219,0.8)',borderRadius:4},{label:'采购',data:pArr,backgroundColor:'rgba(243,156,18,0.8)',borderRadius:4},{label:'利润',data:prArr,backgroundColor:'rgba(39,174,96,0.8)',borderRadius:4}] },
+    options:{ responsive:true,maintainAspectRatio:false, plugins:{legend:{position:'top',labels:{boxWidth:12,font:{size:11}}}}, scales:{y:{ticks:{callback:v=>'¥'+(v/1000)+'k'},grid:{color:'#f0f0f0'}},x:{grid:{display:false}}} }
+  });
+
+  if(fChart3)fChart3.destroy();
+  fChart3=new Chart(document.getElementById('purchasePieChart').getContext('2d'),{
+    type:'doughnut', data:{ labels:['电子产品','配件','包装材料','其他'], datasets:[{data:[45,30,15,10],backgroundColor:['#3498db','#f39c12','#27ae60','#e74c3c'],borderWidth:0}] },
+    options:{ responsive:true,maintainAspectRatio:false, plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:12},padding:16}}} }
+  });
+}
+
+// ===== CRUD =====
+function openModal(type){document.getElementById('modal-'+type).classList.add('show');}
+function closeModal(type){document.getElementById('modal-'+type).classList.remove('show');}
+
+function submitInbound() {
+  const data=getStore();const now=new Date();const dateStr=now.toISOString().split('T')[0];
+  const id='IN-'+dateStr.replace(/-/g,'')+'-'+String(data.inboundOrders.length+1).padStart(2,'0');
+  const sku=document.getElementById('in-sku').value.trim();
+  const qty=parseInt(document.getElementById('in-qty').value)||0;
+  const cost=parseFloat(document.getElementById('in-cost').value)||0;
+  const handler=document.getElementById('in-handler').value.trim()||(getSession()?.username||'Admin');
+  const notes=document.getElementById('in-notes').value.trim();
+  if(!sku||qty<=0){alert('请填写SKU和数量');return;}
+  data.inboundOrders.push({id,warehouse:'主仓库',status:'completed',handler,date:dateStr,sku,qty,cost,notes});
+  const mk=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  if(!data.monthlyData[mk])data.monthlyData[mk]={sales:0,purchase:0,returns:0,opex:0,orders:0};
+  data.monthlyData[mk].purchase+=qty*cost;
+  saveStore(data);closeModal('inbound');renderInbound();
+  ['in-sku','in-qty','in-cost','in-handler','in-notes'].forEach(id=>document.getElementById(id).value='');
+}
+
+function submitOutbound() {
+  const data=getStore();const now=new Date();const dateStr=now.toISOString().split('T')[0];
+  const id='OUT-'+dateStr.replace(/-/g,'')+'-'+String(data.outboundOrders.length+1).padStart(2,'0');
+  const sku=document.getElementById('out-sku').value.trim();
+  const qty=parseInt(document.getElementById('out-qty').value)||0;
+  const price=parseFloat(document.getElementById('out-price').value)||0;
+  const handler=document.getElementById('out-handler').value.trim()||(getSession()?.username||'Admin');
+  const notes=document.getElementById('out-notes').value.trim();
+  if(!sku||qty<=0){alert('请填写SKU和数量');return;}
+  data.outboundOrders.push({id,warehouse:'主仓库',status:'completed',handler,date:dateStr,sku,qty,price,notes});
+  const mk=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  if(!data.monthlyData[mk])data.monthlyData[mk]={sales:0,purchase:0,returns:0,opex:0,orders:0};
+  data.monthlyData[mk].sales+=qty*price;data.monthlyData[mk].orders+=1;
+  saveStore(data);closeModal('outbound');renderOutbound();
+  ['out-sku','out-qty','out-price','out-handler','out-notes'].forEach(id=>document.getElementById(id).value='');
+}
+
+function deleteInbound(i){if(!confirm('确认删除？'))return;const d=getStore();d.inboundOrders.splice(i,1);saveStore(d);renderInbound();}
+function deleteOutbound(i){if(!confirm('确认删除？'))return;const d=getStore();d.outboundOrders.splice(i,1);saveStore(d);renderOutbound();}
+
+function switchOutTab(tab) {
+  document.getElementById('outTab-out').style.display=tab==='out'?'block':'none';
+  document.getElementById('outTab-delivery').style.display=tab==='delivery'?'block':'none';
+  document.querySelectorAll('#page-outbound .tab').forEach((t,i)=>t.classList.toggle('active',(i===0&&tab==='out')||(i===1&&tab==='delivery')));
+}
+function switchInvTab(tab) {
+  document.getElementById('invTab-balances').style.display=tab==='balances'?'block':'none';
+  document.getElementById('invTab-movements').style.display=tab==='movements'?'block':'none';
+  document.querySelectorAll('#page-inventory .tab').forEach((t,i)=>t.classList.toggle('active',(i===0&&tab==='balances')||(i===1&&tab==='movements')));
+}
+
+function searchSKU() {
+  const input=document.getElementById('scanInput').value.trim();
+  if(!input)return;
+  const data=getStore();
+  const product=data.products.find(p=>p.sku.toLowerCase()===input.toLowerCase());
+  const resultDiv=document.getElementById('scanResult');
+  const contentDiv=document.getElementById('scanResultContent');
+  if(product){
+    let stock=0;
+    data.inboundOrders.filter(o=>o.status==='completed'&&o.sku===product.sku).forEach(o=>stock+=o.qty);
+    data.outboundOrders.filter(o=>o.status==='completed'&&o.sku===product.sku).forEach(o=>stock-=o.qty);
+    contentDiv.innerHTML=`
+      <div class="data-row"><span class="dr-label">SKU</span><span class="dr-value">${product.sku}</span></div>
+      <div class="data-row"><span class="dr-label">名称</span><span class="dr-value">${product.name}</span></div>
+      <div class="data-row"><span class="dr-label">颜色</span><span class="dr-value">${product.color}</span></div>
+      <div class="data-row"><span class="dr-label">分类</span><span class="dr-value">${product.category}</span></div>
+      <div class="data-row"><span class="dr-label">库存</span><span class="dr-value" style="color:${stock<10?'var(--accent-red)':'var(--accent-green)'};font-size:18px">${stock}</span></div>`;
+    resultDiv.style.display='block';
+  } else {
+    contentDiv.innerHTML='<div class="no-data">未找到该商品 / Not found</div>';
+    resultDiv.style.display='block';
+  }
+}
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded',()=>{
+  const session=getSession();
+  if(session) showApp(); else showAuth();
+});
+</script>
+</body>
+</html>

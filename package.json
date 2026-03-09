@@ -1,0 +1,12 @@
+{
+  "name": "warehouse-management-system",
+  "version": "1.0.0",
+  "description": "仓储管理系统 / Warehouse Management System",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0"
+  }
+}
