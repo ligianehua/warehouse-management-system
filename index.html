@@ -944,7 +944,7 @@ td {
         </div>
         <div class="table-wrapper">
           <table>
-            <thead><tr><th>SKU</th><th>名称/Name</th><th>颜色/Color</th><th>仓库</th><th>库位</th><th>在手量</th></tr></thead>
+            <thead><tr><th>SKU</th><th>名称/Name</th><th>颜色/Color</th><th>单位</th><th>仓库</th><th>库位</th><th>在手量</th></tr></thead>
             <tbody id="balanceTable"></tbody>
           </table>
         </div>
@@ -1042,6 +1042,7 @@ td {
     <h2>📥 新建入库单</h2>
     <div class="form-group"><label>仓库</label><select id="in-warehouse"><option>主仓库</option></select></div>
     <div class="form-group"><label>商品SKU</label><input type="text" id="in-sku" placeholder="输入商品SKU"></div>
+    <div class="form-group"><label>单位 / Unit</label><select id="in-unit"><option value="个">个</option><option value="件">件</option><option value="箱">箱</option><option value="包">包</option><option value="套">套</option><option value="卷">卷</option><option value="瓶">瓶</option><option value="kg">kg</option><option value="m">m</option></select></div>
     <div class="form-group"><label>数量</label><input type="number" id="in-qty" placeholder="输入数量" min="1"></div>
     <div class="form-group"><label>采购单价</label><input type="number" id="in-cost" placeholder="输入单价" step="0.01"></div>
     <div class="form-group"><label>经手人</label><input type="text" id="in-handler" placeholder="输入经手人"></div>
@@ -1059,6 +1060,7 @@ td {
     <h2>📤 新建出库单</h2>
     <div class="form-group"><label>仓库</label><select id="out-warehouse"><option>主仓库</option></select></div>
     <div class="form-group"><label>商品SKU</label><input type="text" id="out-sku" placeholder="输入商品SKU"></div>
+    <div class="form-group"><label>单位 / Unit</label><select id="out-unit"><option value="个">个</option><option value="件">件</option><option value="箱">箱</option><option value="包">包</option><option value="套">套</option><option value="卷">卷</option><option value="瓶">瓶</option><option value="kg">kg</option><option value="m">m</option></select></div>
     <div class="form-group"><label>数量</label><input type="number" id="out-qty" placeholder="输入数量" min="1"></div>
     <div class="form-group"><label>销售单价</label><input type="number" id="out-price" placeholder="输入单价" step="0.01"></div>
     <div class="form-group"><label>经手人</label><input type="text" id="out-handler" placeholder="输入经手人"></div>
@@ -1180,25 +1182,25 @@ function getStore() {
   if (raw) return JSON.parse(raw);
   const defaultData = {
     inboundOrders: [
-      { id:'IN-20260301', warehouse:'主仓库', status:'completed', handler:'Admin', date:'2026-03-01', sku:'SKU-001', qty:50, cost:120, notes:'首批采购' },
-      { id:'IN-20260305', warehouse:'主仓库', status:'completed', handler:'Admin', date:'2026-03-05', sku:'SKU-002', qty:30, cost:85, notes:'' },
-      { id:'IN-20260308', warehouse:'主仓库', status:'completed', handler:'张三', date:'2026-03-08', sku:'SKU-003', qty:100, cost:45, notes:'补货' },
-      { id:'IN-20260310', warehouse:'主仓库', status:'pending', handler:'李四', date:'2026-03-10', sku:'SKU-001', qty:20, cost:118, notes:'' },
-      { id:'IN-20260312', warehouse:'主仓库', status:'completed', handler:'Admin', date:'2026-03-12', sku:'SKU-004', qty:60, cost:200, notes:'' },
+      { id:'IN-20260301', warehouse:'主仓库', status:'completed', handler:'Admin', date:'2026-03-01', sku:'SKU-001', qty:50, cost:120, unit:'个', notes:'首批采购' },
+      { id:'IN-20260305', warehouse:'主仓库', status:'completed', handler:'Admin', date:'2026-03-05', sku:'SKU-002', qty:30, cost:85, unit:'个', notes:'' },
+      { id:'IN-20260308', warehouse:'主仓库', status:'completed', handler:'张三', date:'2026-03-08', sku:'SKU-003', qty:100, cost:45, unit:'卷', notes:'补货' },
+      { id:'IN-20260310', warehouse:'主仓库', status:'pending', handler:'李四', date:'2026-03-10', sku:'SKU-001', qty:20, cost:118, unit:'个', notes:'' },
+      { id:'IN-20260312', warehouse:'主仓库', status:'completed', handler:'Admin', date:'2026-03-12', sku:'SKU-004', qty:60, cost:200, unit:'个', notes:'' },
     ],
     outboundOrders: [
-      { id:'OUT-20260302', warehouse:'主仓库', status:'completed', handler:'Admin', date:'2026-03-02', sku:'SKU-001', qty:10, price:199, notes:'' },
-      { id:'OUT-20260306', warehouse:'主仓库', status:'completed', handler:'张三', date:'2026-03-06', sku:'SKU-002', qty:15, price:149, notes:'' },
-      { id:'OUT-20260309', warehouse:'主仓库', status:'pending', handler:'Admin', date:'2026-03-09', sku:'SKU-003', qty:40, price:89, notes:'' },
+      { id:'OUT-20260302', warehouse:'主仓库', status:'completed', handler:'Admin', date:'2026-03-02', sku:'SKU-001', qty:10, price:199, unit:'个', notes:'' },
+      { id:'OUT-20260306', warehouse:'主仓库', status:'completed', handler:'张三', date:'2026-03-06', sku:'SKU-002', qty:15, price:149, unit:'个', notes:'' },
+      { id:'OUT-20260309', warehouse:'主仓库', status:'pending', handler:'Admin', date:'2026-03-09', sku:'SKU-003', qty:40, price:89, unit:'卷', notes:'' },
     ],
     deliveryOrders: [
       { id:'DL-20260303', customer:'客户A', status:'completed', handler:'Admin', date:'2026-03-03', notes:'' },
     ],
     products: [
-      { sku:'SKU-001', name:'蓝牙耳机', color:'黑色', category:'电子产品' },
-      { sku:'SKU-002', name:'手机壳', color:'透明', category:'配件' },
-      { sku:'SKU-003', name:'USB数据线', color:'白色', category:'配件' },
-      { sku:'SKU-004', name:'充电宝', color:'银色', category:'电子产品' },
+      { sku:'SKU-001', name:'蓝牙耳机', color:'黑色', category:'电子产品', unit:'个' },
+      { sku:'SKU-002', name:'手机壳', color:'透明', category:'配件', unit:'个' },
+      { sku:'SKU-003', name:'USB数据线', color:'白色', category:'配件', unit:'卷' },
+      { sku:'SKU-004', name:'充电宝', color:'银色', category:'电子产品', unit:'个' },
     ],
     monthlyData: {
       '2025-10':{ sales:38200, purchase:25600, returns:800, opex:0, orders:20 },
@@ -1314,7 +1316,7 @@ function renderInbound() {
     <td>${o.id}</td><td>${o.warehouse}</td>
     <td><span class="badge ${o.status}">${o.status==='completed'?'已完成':o.status==='pending'?'待处理':'已取消'}</span></td>
     <td>${o.handler}</td><td>${o.date}</td>
-    <td><div class="action-btns"><button class="action-btn view" onclick="alert('入库单: ${o.id}\\nSKU: ${o.sku}\\n数量: ${o.qty}\\n单价: ¥${o.cost}')">查看</button><button class="action-btn delete" onclick="deleteInbound(${i})">删除</button></div></td>
+    <td><div class="action-btns"><button class="action-btn view" onclick="alert('入库单: ${o.id}\\nSKU: ${o.sku}\\n数量: ${o.qty} ${o.unit||'个'}\\n单价: ¥${o.cost}/${o.unit||'个'}')">查看</button><button class="action-btn delete" onclick="deleteInbound(${i})">删除</button></div></td>
   </tr>`).join('');
 }
 
@@ -1328,7 +1330,7 @@ function renderOutbound() {
       <td>${o.id}</td><td>${o.warehouse}</td>
       <td><span class="badge ${o.status}">${o.status==='completed'?'已完成':'待处理'}</span></td>
       <td>${o.handler}</td><td>${o.date}</td>
-      <td><div class="action-btns"><button class="action-btn view" onclick="alert('出库单: ${o.id}\\nSKU: ${o.sku}\\n数量: ${o.qty}\\n单价: ¥${o.price}')">查看</button><button class="action-btn delete" onclick="deleteOutbound(${i})">删除</button></div></td>
+      <td><div class="action-btns"><button class="action-btn view" onclick="alert('出库单: ${o.id}\\nSKU: ${o.sku}\\n数量: ${o.qty} ${o.unit||'个'}\\n单价: ¥${o.price}/${o.unit||'个'}')">查看</button><button class="action-btn delete" onclick="deleteOutbound(${i})">删除</button></div></td>
     </tr>`).join('');
   }
   const dtbody = document.getElementById('deliveryTable');
@@ -1349,7 +1351,7 @@ function renderInventory() {
   const rows = data.products.map(p=>({...p,warehouse:'主仓库',location:'A-01',qty:balances[p.sku]||0}));
   if(rows.length===0){tbody.innerHTML='';noData.style.display='block';}
   else { noData.style.display='none';
-    tbody.innerHTML = rows.map(r=>`<tr><td>${r.sku}</td><td>${r.name}</td><td>${r.color}</td><td>${r.warehouse}</td><td>${r.location}</td><td style="font-weight:700;${r.qty<10?'color:var(--accent-red)':''}">${r.qty}</td></tr>`).join('');
+    tbody.innerHTML = rows.map(r=>`<tr><td>${r.sku}</td><td>${r.name}</td><td>${r.color}</td><td>${r.unit||'个'}</td><td>${r.warehouse}</td><td>${r.location}</td><td style="font-weight:700;${r.qty<10?'color:var(--accent-red)':''}">${r.qty} ${r.unit||'个'}</td></tr>`).join('');
   }
   const mtbody = document.getElementById('movementTable');
   const mnoData = document.getElementById('movementNoData');
@@ -1425,12 +1427,13 @@ function submitInbound() {
   const data=getStore();const now=new Date();const dateStr=now.toISOString().split('T')[0];
   const id='IN-'+dateStr.replace(/-/g,'')+'-'+String(data.inboundOrders.length+1).padStart(2,'0');
   const sku=document.getElementById('in-sku').value.trim();
+  const unit=document.getElementById('in-unit').value;
   const qty=parseInt(document.getElementById('in-qty').value)||0;
   const cost=parseFloat(document.getElementById('in-cost').value)||0;
   const handler=document.getElementById('in-handler').value.trim()||(getSession()?.username||'Admin');
   const notes=document.getElementById('in-notes').value.trim();
   if(!sku||qty<=0){alert('请填写SKU和数量');return;}
-  data.inboundOrders.push({id,warehouse:'主仓库',status:'completed',handler,date:dateStr,sku,qty,cost,notes});
+  data.inboundOrders.push({id,warehouse:'主仓库',status:'completed',handler,date:dateStr,sku,qty,cost,unit,notes});
   const mk=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
   if(!data.monthlyData[mk])data.monthlyData[mk]={sales:0,purchase:0,returns:0,opex:0,orders:0};
   data.monthlyData[mk].purchase+=qty*cost;
@@ -1442,12 +1445,13 @@ function submitOutbound() {
   const data=getStore();const now=new Date();const dateStr=now.toISOString().split('T')[0];
   const id='OUT-'+dateStr.replace(/-/g,'')+'-'+String(data.outboundOrders.length+1).padStart(2,'0');
   const sku=document.getElementById('out-sku').value.trim();
+  const unit=document.getElementById('out-unit').value;
   const qty=parseInt(document.getElementById('out-qty').value)||0;
   const price=parseFloat(document.getElementById('out-price').value)||0;
   const handler=document.getElementById('out-handler').value.trim()||(getSession()?.username||'Admin');
   const notes=document.getElementById('out-notes').value.trim();
   if(!sku||qty<=0){alert('请填写SKU和数量');return;}
-  data.outboundOrders.push({id,warehouse:'主仓库',status:'completed',handler,date:dateStr,sku,qty,price,notes});
+  data.outboundOrders.push({id,warehouse:'主仓库',status:'completed',handler,date:dateStr,sku,qty,price,unit,notes});
   const mk=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
   if(!data.monthlyData[mk])data.monthlyData[mk]={sales:0,purchase:0,returns:0,opex:0,orders:0};
   data.monthlyData[mk].sales+=qty*price;data.monthlyData[mk].orders+=1;
@@ -1485,7 +1489,8 @@ function searchSKU() {
       <div class="data-row"><span class="dr-label">名称</span><span class="dr-value">${product.name}</span></div>
       <div class="data-row"><span class="dr-label">颜色</span><span class="dr-value">${product.color}</span></div>
       <div class="data-row"><span class="dr-label">分类</span><span class="dr-value">${product.category}</span></div>
-      <div class="data-row"><span class="dr-label">库存</span><span class="dr-value" style="color:${stock<10?'var(--accent-red)':'var(--accent-green)'};font-size:18px">${stock}</span></div>`;
+      <div class="data-row"><span class="dr-label">单位</span><span class="dr-value">${product.unit||'个'}</span></div>
+      <div class="data-row"><span class="dr-label">库存</span><span class="dr-value" style="color:${stock<10?'var(--accent-red)':'var(--accent-green)'};font-size:18px">${stock} ${product.unit||'个'}</span></div>`;
     resultDiv.style.display='block';
   } else {
     contentDiv.innerHTML='<div class="no-data">未找到该商品 / Not found</div>';
