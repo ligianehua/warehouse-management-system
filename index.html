@@ -590,6 +590,52 @@ td {
 .badge.clickable:hover { opacity: 0.8; }
 .badge.clickable::after { content: '▾'; position: absolute; right: 5px; top: 50%; transform: translateY(-50%); font-size: 10px; }
 
+/* Report page */
+.date-range { display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 16px; }
+.date-range .date-field label { display: block; font-size: 12px; color: var(--text-light); margin-bottom: 4px; }
+.date-range .date-field input { padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; outline: none; }
+.date-range .date-field input:focus { border-color: var(--primary); }
+.report-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+.report-summary-card { border-radius: 12px; padding: 16px 20px; }
+.report-summary-card.blue-card { background: #e8f4fd; border: 1px solid #b6dff7; }
+.report-summary-card.pink-card { background: #fde8ec; border: 1px solid #f7b6c2; }
+.report-summary-card .rsc-title { font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+.report-summary-card .rsc-value { font-size: 24px; font-weight: 700; }
+.report-summary-card.blue-card .rsc-value { color: var(--primary); }
+.report-summary-card.pink-card .rsc-value { color: var(--accent-red); }
+.report-summary-card .rsc-sub { font-size: 12px; color: var(--text-light); margin-top: 4px; }
+.report-tabs { display: flex; gap: 0; margin-bottom: 16px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.report-tab {
+  padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer;
+  border: 1px solid var(--border); background: white; color: var(--text-light);
+  white-space: nowrap; transition: all 0.2s;
+}
+.report-tab:first-child { border-radius: 8px 0 0 8px; }
+.report-tab:last-child { border-radius: 0 8px 8px 0; }
+.report-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
+.report-note { font-size: 12px; color: var(--accent-red); margin-bottom: 12px; }
+
+/* Audit log */
+.audit-info { background: #f7f8fa; border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; color: var(--text-light); display: flex; align-items: center; gap: 8px; }
+
+/* More menu */
+.more-menu-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 150; }
+.more-menu-overlay.show { display: block; }
+.more-menu {
+  position: fixed; bottom: 60px; left: 12px; right: 12px;
+  background: white; border-radius: 16px; padding: 12px;
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.15); z-index: 151;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+}
+.more-menu-item {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 14px 8px; border-radius: 12px; cursor: pointer;
+  border: none; background: #f7f8fa; font-size: 12px; color: var(--text);
+  transition: background 0.2s;
+}
+.more-menu-item:hover { background: #eef0f4; }
+.more-menu-item .mm-icon { font-size: 24px; }
+
 .action-btns { display: flex; gap: 6px; }
 .action-btn {
   padding: 4px 10px;
@@ -846,6 +892,12 @@ td {
       <button class="sidebar-item" onclick="navigateTo('finance')">
         <span class="si-icon">💰</span> 财务报表 / Finance
       </button>
+      <button class="sidebar-item" onclick="navigateTo('salesreport')">
+        <span class="si-icon">📈</span> 销售报表 / Reports
+      </button>
+      <button class="sidebar-item" onclick="navigateTo('auditlog')">
+        <span class="si-icon">📋</span> 操作日志 / Audit Log
+      </button>
     </nav>
     <div class="sidebar-user">
       <div class="su-info">
@@ -1100,6 +1152,118 @@ td {
         </div>
       </div>
     </div>
+
+    <!-- PAGE: Sales Report -->
+    <div class="page" id="page-salesreport">
+      <div class="card">
+        <div class="date-range">
+          <div class="date-field">
+            <label>开始日期</label>
+            <input type="date" id="report-start" value="2026-03-01" onchange="renderSalesReport()">
+          </div>
+          <div class="date-field">
+            <label>结束日期</label>
+            <input type="date" id="report-end" onchange="renderSalesReport()">
+          </div>
+        </div>
+        <div class="report-summary">
+          <div class="report-summary-card blue-card">
+            <div class="rsc-title">🚚 送货单（销售）</div>
+            <div class="rsc-value" id="rpt-sales-amount">₱0.00</div>
+            <div class="rsc-sub" id="rpt-sales-count">0 单</div>
+          </div>
+          <div class="report-summary-card pink-card">
+            <div class="rsc-title">🚀 出库单（出库）</div>
+            <div class="rsc-value" id="rpt-out-count">0 件</div>
+            <div class="rsc-sub" id="rpt-out-orders">0 张出库单</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="report-tabs">
+        <button class="report-tab active" onclick="switchReportTab('overview')">📊 今日概览</button>
+        <button class="report-tab" onclick="switchReportTab('daily')">📅 每日销售</button>
+        <button class="report-tab" onclick="switchReportTab('monthly')">📆 每月销售</button>
+        <button class="report-tab" onclick="switchReportTab('hotproducts')">🏆 热卖商品</button>
+        <button class="report-tab" onclick="switchReportTab('outreport')">🚀 出库报表</button>
+      </div>
+
+      <div class="card" id="rptTab-overview">
+        <div class="report-note">📌 仅统计已确认的送货单。</div>
+        <h3 style="margin-bottom:12px">今日营收概览</h3>
+        <div class="finance-page"><div class="stat-row">
+          <div class="stat-box green"><div class="s-label">今日销售</div><div class="s-value" id="rpt-today-sales">¥0</div></div>
+          <div class="stat-box blue"><div class="s-label">今日订单</div><div class="s-value" id="rpt-today-orders">0</div></div>
+          <div class="stat-box orange"><div class="s-label">今日采购</div><div class="s-value" id="rpt-today-purchase">0</div></div>
+        </div></div>
+        <div class="detail-chart" style="margin-top:16px">
+          <h3>📊 近7日营收趋势</h3>
+          <canvas id="overviewChart"></canvas>
+        </div>
+      </div>
+
+      <div class="card" id="rptTab-daily" style="display:none">
+        <div class="report-note">📌 仅统计已确认的送货单。</div>
+        <h3 style="margin-bottom:12px">每日营收图表</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>日期</th><th>订单数</th><th>营收</th></tr></thead>
+            <tbody id="dailySalesTable"></tbody>
+          </table>
+        </div>
+        <div class="no-data" id="dailySalesNoData" style="display:none">暂无数据 / No data</div>
+      </div>
+
+      <div class="card" id="rptTab-monthly" style="display:none">
+        <h3 style="margin-bottom:12px">每月销售汇总</h3>
+        <div class="detail-chart">
+          <canvas id="monthlySalesReportChart"></canvas>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>月份</th><th>销售额</th><th>采购额</th><th>利润</th><th>订单数</th></tr></thead>
+            <tbody id="monthlySalesTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card" id="rptTab-hotproducts" style="display:none">
+        <h3 style="margin-bottom:12px">🏆 热卖商品排行</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>排名</th><th>SKU</th><th>商品名</th><th>销量</th><th>销售额</th></tr></thead>
+            <tbody id="hotProductsTable"></tbody>
+          </table>
+        </div>
+        <div class="no-data" id="hotProductsNoData" style="display:none">暂无数据 / No data</div>
+      </div>
+
+      <div class="card" id="rptTab-outreport" style="display:none">
+        <h3 style="margin-bottom:12px">出库报表明细</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>单号</th><th>日期</th><th>SKU</th><th>数量</th><th>单价</th><th>金额</th><th>经手人</th></tr></thead>
+            <tbody id="outReportTable"></tbody>
+          </table>
+        </div>
+        <div class="no-data" id="outReportNoData" style="display:none">暂无数据 / No data</div>
+      </div>
+    </div>
+
+    <!-- PAGE: Audit Log -->
+    <div class="page" id="page-auditlog">
+      <div class="card">
+        <div class="audit-info">📋 显示所有用户的操作记录 / All user actions are logged here</div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>时间 / Time</th><th>用户 / User</th><th>角色 / Role</th><th>操作 / Action</th><th>详情 / Detail</th></tr></thead>
+            <tbody id="auditLogTable"></tbody>
+          </table>
+        </div>
+        <div class="no-data" id="auditLogNoData" style="display:none">暂无数据 / No data</div>
+      </div>
+    </div>
+
   </div><!-- /main-area -->
 </div><!-- /app-container -->
 
@@ -1160,12 +1324,19 @@ td {
 </div>
 
 <!-- Bottom Navigation (mobile/tablet) -->
+<div class="more-menu-overlay" id="moreMenuOverlay" onclick="toggleMoreMenu()"></div>
+<div class="more-menu" id="moreMenu" style="display:none">
+  <button class="more-menu-item" onclick="navigateTo('scan');toggleMoreMenu()"><span class="mm-icon">📷</span>扫码查询</button>
+  <button class="more-menu-item" onclick="navigateTo('finance');toggleMoreMenu()"><span class="mm-icon">💰</span>财务报表</button>
+  <button class="more-menu-item" onclick="navigateTo('salesreport');toggleMoreMenu()"><span class="mm-icon">📈</span>销售报表</button>
+  <button class="more-menu-item" onclick="navigateTo('auditlog');toggleMoreMenu()"><span class="mm-icon">📋</span>操作日志</button>
+</div>
 <div class="bottom-nav" id="bottomNav">
   <button class="nav-item active" onclick="navigateTo('dashboard')"><span class="nav-icon">📊</span><span>仪表盘</span></button>
   <button class="nav-item" onclick="navigateTo('inbound')"><span class="nav-icon">📥</span><span>入库</span></button>
   <button class="nav-item" onclick="navigateTo('outbound')"><span class="nav-icon">📤</span><span>出库</span></button>
   <button class="nav-item" onclick="navigateTo('inventory')"><span class="nav-icon">📁</span><span>库存</span></button>
-  <button class="nav-item" onclick="navigateTo('scan')"><span class="nav-icon">📷</span><span>扫码查询</span></button>
+  <button class="nav-item" onclick="toggleMoreMenu()"><span class="nav-icon">⋯</span><span>更多</span></button>
 </div>
 
 <script>
@@ -1206,6 +1377,7 @@ function handleLogin(e) {
     return false;
   }
   setSession(user);
+  logAction('登录', '用户 ' + user.username + ' 登录系统');
   showApp();
   return false;
 }
@@ -1234,11 +1406,13 @@ function handleRegister(e) {
   users.push(newUser);
   saveUsers(users);
   setSession(newUser);
+  logAction('注册', '新用户 ' + username + ' 注册 (' + role + ')');
   showApp();
   return false;
 }
 
 function handleLogout() {
+  logAction('登出', '用户退出系统');
   clearSession();
   showAuth();
 }
@@ -1308,7 +1482,8 @@ let currentPage = 'dashboard';
 let pageHistory = [];
 const pageTitles = {
   dashboard:'仪表盘 / Dashboard', inbound:'入库单', outbound:'出库单',
-  inventory:'库存 / Stock', scan:'扫码查询', finance:'📊 财务报表 / Finance'
+  inventory:'库存 / Stock', scan:'扫码查询', finance:'📊 财务报表 / Finance',
+  salesreport:'报表 / Reports', auditlog:'操作日志 / Audit Log'
 };
 const pageActions = {
   inbound: '<button class="header-btn" onclick="openModal(\'inbound\')">+ 新建入库单</button>',
@@ -1333,7 +1508,7 @@ function showPage() {
   document.getElementById('headerTitle').textContent = pageTitles[currentPage] || '';
   const mobileLogout = '<button class="mobile-logout" onclick="handleLogout()">退出</button>';
   document.getElementById('headerActions').innerHTML = (pageActions[currentPage] || '') + mobileLogout;
-  document.getElementById('backBtn').style.display = (currentPage === 'finance') ? 'block' : 'none';
+  document.getElementById('backBtn').style.display = ['finance','salesreport','auditlog'].includes(currentPage) ? 'block' : 'none';
 
   // Bottom nav active
   const pages = ['dashboard','inbound','outbound','inventory','scan'];
@@ -1341,7 +1516,7 @@ function showPage() {
   // Sidebar active
   document.querySelectorAll('.sidebar-item').forEach(s => {
     const text = s.textContent.toLowerCase();
-    const map = { dashboard:'仪表盘', inbound:'入库', outbound:'出库', inventory:'库存', scan:'扫码', finance:'财务' };
+    const map = { dashboard:'仪表盘', inbound:'入库', outbound:'出库', inventory:'库存', scan:'扫码', finance:'财务', salesreport:'销售报表', auditlog:'操作日志' };
     s.classList.toggle('active', text.includes(map[currentPage] || '---'));
   });
 
@@ -1351,6 +1526,8 @@ function showPage() {
   if (currentPage === 'outbound') renderOutbound();
   if (currentPage === 'inventory') renderInventory();
   if (currentPage === 'finance') renderFinance();
+  if (currentPage === 'salesreport') renderSalesReport();
+  if (currentPage === 'auditlog') renderAuditLog();
 }
 
 // ===== RENDER FUNCTIONS =====
@@ -1600,6 +1777,7 @@ function submitInbound() {
     data.monthlyData[mk].purchase+=item.qty*item.price;
   });
 
+  logAction('新建入库单', 'SKU: '+sku+', '+items.map(it=>it.qty+it.unit+'×¥'+it.price).join(', '));
   saveStore(data);closeModal('inbound');renderInbound();
   ['in-sku','in-handler','in-notes'].forEach(id=>document.getElementById(id).value='');
 }
@@ -1621,6 +1799,7 @@ function submitOutbound() {
     data.monthlyData[mk].sales+=item.qty*item.price;data.monthlyData[mk].orders+=1;
   });
 
+  logAction('新建出库单', 'SKU: '+sku+', '+items.map(it=>it.qty+it.unit+'×¥'+it.price).join(', '));
   saveStore(data);closeModal('outbound');renderOutbound();
   ['out-sku','out-handler','out-notes'].forEach(id=>document.getElementById(id).value='');
 }
@@ -1636,6 +1815,7 @@ function cycleInboundStatus(i) {
   const next=STATUS_CYCLE[nextIdx];
   if(confirm(`将入库单状态从「${STATUS_NAMES[current]}」改为「${STATUS_NAMES[next]}」？`)){
     d.inboundOrders[i].status=next;
+    logAction('修改入库状态', d.inboundOrders[i].id+': '+STATUS_NAMES[current]+' → '+STATUS_NAMES[next]);
     saveStore(d);renderInbound();
   }
 }
@@ -1647,12 +1827,13 @@ function cycleOutboundStatus(i) {
   const next=STATUS_CYCLE[nextIdx];
   if(confirm(`将出库单状态从「${STATUS_NAMES[current]}」改为「${STATUS_NAMES[next]}」？`)){
     d.outboundOrders[i].status=next;
+    logAction('修改出库状态', d.outboundOrders[i].id+': '+STATUS_NAMES[current]+' → '+STATUS_NAMES[next]);
     saveStore(d);renderOutbound();
   }
 }
 
-function deleteInbound(i){if(!confirm('确认删除？'))return;const d=getStore();d.inboundOrders.splice(i,1);saveStore(d);renderInbound();}
-function deleteOutbound(i){if(!confirm('确认删除？'))return;const d=getStore();d.outboundOrders.splice(i,1);saveStore(d);renderOutbound();}
+function deleteInbound(i){if(!confirm('确认删除？'))return;const d=getStore();const removed=d.inboundOrders[i];logAction('删除入库单',removed.id+' SKU:'+removed.sku);d.inboundOrders.splice(i,1);saveStore(d);renderInbound();}
+function deleteOutbound(i){if(!confirm('确认删除？'))return;const d=getStore();const removed=d.outboundOrders[i];logAction('删除出库单',removed.id+' SKU:'+removed.sku);d.outboundOrders.splice(i,1);saveStore(d);renderOutbound();}
 
 function switchOutTab(tab) {
   document.getElementById('outTab-out').style.display=tab==='out'?'block':'none';
@@ -1690,9 +1871,201 @@ function searchSKU() {
   }
 }
 
+// ===== MORE MENU (mobile) =====
+function toggleMoreMenu() {
+  const overlay = document.getElementById('moreMenuOverlay');
+  const menu = document.getElementById('moreMenu');
+  const isOpen = overlay.classList.contains('show');
+  if (isOpen) { overlay.classList.remove('show'); menu.style.display = 'none'; }
+  else { overlay.classList.add('show'); menu.style.display = 'grid'; }
+}
+
+// ===== AUDIT LOG SYSTEM =====
+const AUDIT_KEY = 'warehouse_audit_log';
+function getAuditLog() { const raw=localStorage.getItem(AUDIT_KEY); return raw?JSON.parse(raw):[]; }
+function saveAuditLog(log) { localStorage.setItem(AUDIT_KEY, JSON.stringify(log)); }
+
+function logAction(action, detail) {
+  const session = getSession();
+  const log = getAuditLog();
+  log.unshift({
+    timestamp: new Date().toLocaleString('zh-CN', {year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'}),
+    user: session ? session.username : '未知',
+    role: session ? session.role : '-',
+    action: action,
+    detail: detail
+  });
+  if (log.length > 200) log.length = 200; // Keep last 200 entries
+  saveAuditLog(log);
+}
+
+function renderAuditLog() {
+  const log = getAuditLog();
+  const tbody = document.getElementById('auditLogTable');
+  const noData = document.getElementById('auditLogNoData');
+  if (log.length === 0) { tbody.innerHTML=''; noData.style.display='block'; return; }
+  noData.style.display = 'none';
+  tbody.innerHTML = log.map(l => `<tr>
+    <td>${l.timestamp}</td>
+    <td>${l.user}</td>
+    <td><span class="badge ${l.role==='owner'?'completed':'pending'}">${l.role==='owner'?'管理员':'员工'}</span></td>
+    <td>${l.action}</td>
+    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis">${l.detail}</td>
+  </tr>`).join('');
+}
+
+// ===== SALES REPORT =====
+let rptOverviewChart, rptMonthlyChart;
+
+function switchReportTab(tab) {
+  const tabs = ['overview','daily','monthly','hotproducts','outreport'];
+  tabs.forEach(t => {
+    const el = document.getElementById('rptTab-'+t);
+    if(el) el.style.display = t===tab ? 'block' : 'none';
+  });
+  document.querySelectorAll('.report-tab').forEach((btn, i) => btn.classList.toggle('active', tabs[i]===tab));
+  renderSalesReport();
+}
+
+function renderSalesReport() {
+  const data = getStore();
+  const startDate = document.getElementById('report-start')?.value || '2026-03-01';
+  const endDate = document.getElementById('report-end')?.value || new Date().toISOString().split('T')[0];
+
+  // Filter completed outbound orders within date range
+  const filteredOut = data.outboundOrders.filter(o =>
+    o.status==='completed' && o.date >= startDate && o.date <= endDate
+  );
+  const filteredIn = data.inboundOrders.filter(o =>
+    o.status==='completed' && o.date >= startDate && o.date <= endDate
+  );
+
+  // Summary cards
+  const totalSales = filteredOut.reduce((s, o) => s + (o.qty * (o.price||0)), 0);
+  const totalOutQty = filteredOut.reduce((s, o) => s + o.qty, 0);
+  document.getElementById('rpt-sales-amount').textContent = '¥' + totalSales.toLocaleString();
+  document.getElementById('rpt-sales-count').textContent = filteredOut.length + ' 单';
+  document.getElementById('rpt-out-count').textContent = totalOutQty + ' 件';
+  document.getElementById('rpt-out-orders').textContent = filteredOut.length + ' 张出库单';
+
+  // Today overview
+  const today = new Date().toISOString().split('T')[0];
+  const todayOut = data.outboundOrders.filter(o => o.status==='completed' && o.date===today);
+  const todayIn = data.inboundOrders.filter(o => o.status==='completed' && o.date===today);
+  document.getElementById('rpt-today-sales').textContent = '¥' + todayOut.reduce((s,o)=>s+(o.qty*(o.price||0)),0).toLocaleString();
+  document.getElementById('rpt-today-orders').textContent = todayOut.length;
+  document.getElementById('rpt-today-purchase').textContent = '¥' + todayIn.reduce((s,o)=>s+(o.qty*(o.cost||0)),0).toLocaleString();
+
+  // Overview chart - last 7 days
+  const last7 = [];
+  for (let i=6; i>=0; i--) {
+    const d = new Date(); d.setDate(d.getDate()-i);
+    last7.push(d.toISOString().split('T')[0]);
+  }
+  const last7Labels = last7.map(d => d.slice(5));
+  const last7Sales = last7.map(d => {
+    return data.outboundOrders.filter(o=>o.status==='completed'&&o.date===d).reduce((s,o)=>s+(o.qty*(o.price||0)),0);
+  });
+  const ctx1 = document.getElementById('overviewChart');
+  if(ctx1) {
+    if(rptOverviewChart)rptOverviewChart.destroy();
+    rptOverviewChart = new Chart(ctx1.getContext('2d'), {
+      type:'bar', data:{ labels:last7Labels, datasets:[{label:'营收',data:last7Sales,backgroundColor:'rgba(52,152,219,0.7)',borderRadius:4}] },
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{ticks:{callback:v=>'¥'+v},grid:{color:'#f0f0f0'}},x:{grid:{display:false}}} }
+    });
+  }
+
+  // Daily sales table
+  const dailyMap = {};
+  filteredOut.forEach(o => {
+    if(!dailyMap[o.date]) dailyMap[o.date] = {orders:0, revenue:0};
+    dailyMap[o.date].orders += 1;
+    dailyMap[o.date].revenue += o.qty * (o.price||0);
+  });
+  const dailyRows = Object.keys(dailyMap).sort().reverse();
+  const dtbody = document.getElementById('dailySalesTable');
+  const dnoData = document.getElementById('dailySalesNoData');
+  if(dailyRows.length===0) { dtbody.innerHTML=''; dnoData.style.display='block'; }
+  else { dnoData.style.display='none';
+    dtbody.innerHTML = dailyRows.map(d => `<tr><td>${d}</td><td>${dailyMap[d].orders}</td><td style="font-weight:700;color:var(--accent-green)">¥${dailyMap[d].revenue.toLocaleString()}</td></tr>`).join('');
+  }
+
+  // Monthly sales table + chart
+  const months6 = [];
+  for(let i=5;i>=0;i--){const d=new Date();d.setMonth(d.getMonth()-i);months6.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`);}
+  const mLabels = months6.map(m => m.slice(5)+'月');
+  const mSales = months6.map(m => (data.monthlyData[m]||{}).sales||0);
+  const mPurch = months6.map(m => (data.monthlyData[m]||{}).purchase||0);
+  const mProfit = months6.map((m,i) => mSales[i]-mPurch[i]);
+  const mOrders = months6.map(m => (data.monthlyData[m]||{}).orders||0);
+
+  const mtbody = document.getElementById('monthlySalesTable');
+  mtbody.innerHTML = months6.map((m,i) => `<tr>
+    <td>${m}</td>
+    <td style="color:var(--accent-blue);font-weight:700">¥${mSales[i].toLocaleString()}</td>
+    <td style="color:var(--accent-orange)">¥${mPurch[i].toLocaleString()}</td>
+    <td style="color:${mProfit[i]>=0?'var(--accent-green)':'var(--accent-red)'};font-weight:700">¥${mProfit[i].toLocaleString()}</td>
+    <td>${mOrders[i]}</td>
+  </tr>`).join('');
+
+  const ctx2 = document.getElementById('monthlySalesReportChart');
+  if(ctx2) {
+    if(rptMonthlyChart)rptMonthlyChart.destroy();
+    rptMonthlyChart = new Chart(ctx2.getContext('2d'), {
+      type:'bar', data:{ labels:mLabels, datasets:[
+        {label:'销售',data:mSales,backgroundColor:'rgba(52,152,219,0.8)',borderRadius:4},
+        {label:'采购',data:mPurch,backgroundColor:'rgba(243,156,18,0.8)',borderRadius:4},
+        {label:'利润',data:mProfit,backgroundColor:'rgba(39,174,96,0.8)',borderRadius:4}
+      ]},
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'top',labels:{boxWidth:12,font:{size:11}}}}, scales:{y:{ticks:{callback:v=>'¥'+(v/1000)+'k'},grid:{color:'#f0f0f0'}},x:{grid:{display:false}}} }
+    });
+  }
+
+  // Hot products
+  const productSales = {};
+  filteredOut.forEach(o => {
+    if(!productSales[o.sku]) productSales[o.sku] = {qty:0, revenue:0};
+    productSales[o.sku].qty += o.qty;
+    productSales[o.sku].revenue += o.qty * (o.price||0);
+  });
+  const hotList = Object.entries(productSales).sort((a,b) => b[1].qty - a[1].qty);
+  const htbody = document.getElementById('hotProductsTable');
+  const hnoData = document.getElementById('hotProductsNoData');
+  if(hotList.length===0) { htbody.innerHTML=''; hnoData.style.display='block'; }
+  else { hnoData.style.display='none';
+    htbody.innerHTML = hotList.map(([sku, d], i) => {
+      const p = data.products.find(pp => pp.sku===sku);
+      return `<tr>
+        <td style="font-weight:700;color:${i<3?'var(--accent-orange)':'var(--text)'}">${i+1}</td>
+        <td>${sku}</td>
+        <td>${p?p.name:'-'}</td>
+        <td style="font-weight:700">${d.qty}</td>
+        <td style="color:var(--accent-green);font-weight:700">¥${d.revenue.toLocaleString()}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  // Outbound report detail
+  const otbody = document.getElementById('outReportTable');
+  const onoData = document.getElementById('outReportNoData');
+  if(filteredOut.length===0) { otbody.innerHTML=''; onoData.style.display='block'; }
+  else { onoData.style.display='none';
+    otbody.innerHTML = filteredOut.sort((a,b)=>b.date.localeCompare(a.date)).map(o => `<tr>
+      <td>${o.id}</td><td>${o.date}</td><td>${o.sku}</td>
+      <td>${o.qty} ${o.unit||'个'}</td>
+      <td>¥${o.price||0}/${o.unit||'个'}</td>
+      <td style="font-weight:700;color:var(--accent-green)">¥${(o.qty*(o.price||0)).toLocaleString()}</td>
+      <td>${o.handler}</td>
+    </tr>`).join('');
+  }
+}
+
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded',()=>{
   const session=getSession();
+  // Set default end date for reports
+  const endInput = document.getElementById('report-end');
+  if(endInput) endInput.value = new Date().toISOString().split('T')[0];
   if(session) showApp(); else showAuth();
 });
 </script>
