@@ -889,11 +889,8 @@ td {
       <button class="sidebar-item" onclick="navigateTo('scan')">
         <span class="si-icon">📷</span> 扫码查询 / Scan
       </button>
-      <button class="sidebar-item" onclick="navigateTo('finance')">
-        <span class="si-icon">💰</span> 财务报表 / Finance
-      </button>
       <button class="sidebar-item" onclick="navigateTo('salesreport')">
-        <span class="si-icon">📈</span> 销售报表 / Reports
+        <span class="si-icon">📊</span> 报表 / Reports
       </button>
       <button class="sidebar-item" onclick="navigateTo('auditlog')">
         <span class="si-icon">📋</span> 操作日志 / Audit Log
@@ -961,17 +958,17 @@ td {
         <span class="line"></span>
       </div>
       <div class="finance-cards">
-        <div class="finance-card profit" onclick="navigateTo('finance')">
+        <div class="finance-card profit" onclick="navigateTo('salesreport')">
           <div class="f-icon">💰</div>
           <div class="f-label">每月利润 / Profit</div>
           <div class="f-value" id="dash-profit">¥18,500</div>
         </div>
-        <div class="finance-card sales" onclick="navigateTo('finance')">
+        <div class="finance-card sales" onclick="navigateTo('salesreport')">
           <div class="f-icon">📈</div>
           <div class="f-label">每月销售 / Sales</div>
           <div class="f-value" id="dash-sales">¥52,300</div>
         </div>
-        <div class="finance-card purchase" onclick="navigateTo('finance')">
+        <div class="finance-card purchase" onclick="navigateTo('salesreport')">
           <div class="f-icon">🛒</div>
           <div class="f-label">每月采购 / Purchase</div>
           <div class="f-value" id="dash-purchase">¥33,800</div>
@@ -979,11 +976,11 @@ td {
       </div>
 
       <div class="chart-row">
-        <div class="chart-preview" onclick="navigateTo('finance')">
+        <div class="chart-preview" onclick="navigateTo('salesreport')">
           <div class="chart-title">近6个月利润趋势 / 6-Month Profit Trend<span class="more">查看详情 &rarr;</span></div>
           <canvas id="miniProfitChart"></canvas>
         </div>
-        <div class="chart-preview" onclick="navigateTo('finance')">
+        <div class="chart-preview" onclick="navigateTo('salesreport')">
           <div class="chart-title">销售 vs 采购 / Sales vs Purchase<span class="more">查看详情 &rarr;</span></div>
           <canvas id="miniSalesChart"></canvas>
         </div>
@@ -1111,49 +1108,7 @@ td {
     </div>
 
     <!-- PAGE: Finance Detail -->
-    <div class="page finance-page" id="page-finance">
-      <div class="month-selector">
-        <button onclick="changeMonth(-1)">&#8592;</button>
-        <span id="currentMonth">2026年3月</span>
-        <button onclick="changeMonth(1)">&#8594;</button>
-      </div>
-      <div class="stat-row">
-        <div class="stat-box green"><div class="s-label">本月利润 / Profit</div><div class="s-value" id="f-profit">¥18,500</div></div>
-        <div class="stat-box blue"><div class="s-label">本月销售 / Sales</div><div class="s-value" id="f-sales">¥52,300</div></div>
-        <div class="stat-box orange"><div class="s-label">本月采购 / Purchase</div><div class="s-value" id="f-purchase">¥33,800</div></div>
-      </div>
-      <div class="stat-row">
-        <div class="stat-box"><div class="s-label">利润率 / Margin</div><div class="s-value" style="color:var(--accent-green)" id="f-margin">35.4%</div></div>
-        <div class="stat-box"><div class="s-label">订单数 / Orders</div><div class="s-value" style="color:var(--primary)" id="f-orders">28</div></div>
-        <div class="stat-box red"><div class="s-label">退货额 / Returns</div><div class="s-value" id="f-returns">¥1,200</div></div>
-      </div>
-      <div class="chart-row">
-        <div class="detail-chart">
-          <h3>📊 每日销售趋势 / Daily Sales Trend</h3>
-          <canvas id="dailySalesChart"></canvas>
-        </div>
-        <div class="detail-chart">
-          <h3>💰 利润 vs 销售 vs 采购</h3>
-          <canvas id="comparisonChart"></canvas>
-        </div>
-      </div>
-      <div class="chart-row">
-        <div class="detail-chart">
-          <h3>📦 采购分类占比 / Purchase by Category</h3>
-          <canvas id="purchasePieChart"></canvas>
-        </div>
-        <div class="detail-chart">
-          <h3>📋 月度财务明细 / Monthly Details</h3>
-          <div class="data-row"><span class="dr-label">总销售额</span><span class="dr-value" id="fd-sales">¥52,300</span></div>
-          <div class="data-row"><span class="dr-label">总采购成本</span><span class="dr-value" id="fd-purchase">¥33,800</span></div>
-          <div class="data-row"><span class="dr-label">运营费用</span><span class="dr-value" id="fd-opex">¥0</span></div>
-          <div class="data-row"><span class="dr-label">退货金额</span><span class="dr-value" id="fd-returns">¥1,200</span></div>
-          <div class="data-row"><span class="dr-label">净利润</span><span class="dr-value" style="color:var(--accent-green);font-size:18px" id="fd-profit">¥18,500</span></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- PAGE: Sales Report -->
+    <!-- PAGE: Reports (merged) -->
     <div class="page" id="page-salesreport">
       <div class="card">
         <div class="date-range">
@@ -1186,6 +1141,7 @@ td {
         <button class="report-tab" onclick="switchReportTab('monthly')">📆 每月销售</button>
         <button class="report-tab" onclick="switchReportTab('hotproducts')">🏆 热卖商品</button>
         <button class="report-tab" onclick="switchReportTab('outreport')">🚀 出库报表</button>
+        <button class="report-tab" onclick="switchReportTab('finance')">💰 财务明细</button>
       </div>
 
       <div class="card" id="rptTab-overview">
@@ -1247,6 +1203,48 @@ td {
           </table>
         </div>
         <div class="no-data" id="outReportNoData" style="display:none">暂无数据 / No data</div>
+      </div>
+
+      <div class="card finance-page" id="rptTab-finance" style="display:none">
+        <div class="month-selector">
+          <button onclick="changeMonth(-1)">&#8592;</button>
+          <span id="currentMonth">2026年3月</span>
+          <button onclick="changeMonth(1)">&#8594;</button>
+        </div>
+        <div class="stat-row">
+          <div class="stat-box green"><div class="s-label">本月利润 / Profit</div><div class="s-value" id="f-profit">¥18,500</div></div>
+          <div class="stat-box blue"><div class="s-label">本月销售 / Sales</div><div class="s-value" id="f-sales">¥52,300</div></div>
+          <div class="stat-box orange"><div class="s-label">本月采购 / Purchase</div><div class="s-value" id="f-purchase">¥33,800</div></div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-box"><div class="s-label">利润率 / Margin</div><div class="s-value" style="color:var(--accent-green)" id="f-margin">35.4%</div></div>
+          <div class="stat-box"><div class="s-label">订单数 / Orders</div><div class="s-value" style="color:var(--primary)" id="f-orders">28</div></div>
+          <div class="stat-box red"><div class="s-label">退货额 / Returns</div><div class="s-value" id="f-returns">¥1,200</div></div>
+        </div>
+        <div class="chart-row">
+          <div class="detail-chart">
+            <h3>📊 每日销售趋势 / Daily Sales Trend</h3>
+            <canvas id="dailySalesChart"></canvas>
+          </div>
+          <div class="detail-chart">
+            <h3>💰 利润 vs 销售 vs 采购</h3>
+            <canvas id="comparisonChart"></canvas>
+          </div>
+        </div>
+        <div class="chart-row">
+          <div class="detail-chart">
+            <h3>📦 采购分类占比 / Purchase by Category</h3>
+            <canvas id="purchasePieChart"></canvas>
+          </div>
+          <div class="detail-chart">
+            <h3>📋 月度财务明细 / Monthly Details</h3>
+            <div class="data-row"><span class="dr-label">总销售额</span><span class="dr-value" id="fd-sales">¥52,300</span></div>
+            <div class="data-row"><span class="dr-label">总采购成本</span><span class="dr-value" id="fd-purchase">¥33,800</span></div>
+            <div class="data-row"><span class="dr-label">运营费用</span><span class="dr-value" id="fd-opex">¥0</span></div>
+            <div class="data-row"><span class="dr-label">退货金额</span><span class="dr-value" id="fd-returns">¥1,200</span></div>
+            <div class="data-row"><span class="dr-label">净利润</span><span class="dr-value" style="color:var(--accent-green);font-size:18px" id="fd-profit">¥18,500</span></div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1327,8 +1325,7 @@ td {
 <div class="more-menu-overlay" id="moreMenuOverlay" onclick="toggleMoreMenu()"></div>
 <div class="more-menu" id="moreMenu" style="display:none">
   <button class="more-menu-item" onclick="navigateTo('scan');toggleMoreMenu()"><span class="mm-icon">📷</span>扫码查询</button>
-  <button class="more-menu-item" onclick="navigateTo('finance');toggleMoreMenu()"><span class="mm-icon">💰</span>财务报表</button>
-  <button class="more-menu-item" onclick="navigateTo('salesreport');toggleMoreMenu()"><span class="mm-icon">📈</span>销售报表</button>
+  <button class="more-menu-item" onclick="navigateTo('salesreport');toggleMoreMenu()"><span class="mm-icon">📊</span>报表</button>
   <button class="more-menu-item" onclick="navigateTo('auditlog');toggleMoreMenu()"><span class="mm-icon">📋</span>操作日志</button>
 </div>
 <div class="bottom-nav" id="bottomNav">
@@ -1482,8 +1479,8 @@ let currentPage = 'dashboard';
 let pageHistory = [];
 const pageTitles = {
   dashboard:'仪表盘 / Dashboard', inbound:'入库单', outbound:'出库单',
-  inventory:'库存 / Stock', scan:'扫码查询', finance:'📊 财务报表 / Finance',
-  salesreport:'报表 / Reports', auditlog:'操作日志 / Audit Log'
+  inventory:'库存 / Stock', scan:'扫码查询',
+  salesreport:'📊 报表 / Reports', auditlog:'操作日志 / Audit Log'
 };
 const pageActions = {
   inbound: '<button class="header-btn" onclick="openModal(\'inbound\')">+ 新建入库单</button>',
@@ -1508,7 +1505,7 @@ function showPage() {
   document.getElementById('headerTitle').textContent = pageTitles[currentPage] || '';
   const mobileLogout = '<button class="mobile-logout" onclick="handleLogout()">退出</button>';
   document.getElementById('headerActions').innerHTML = (pageActions[currentPage] || '') + mobileLogout;
-  document.getElementById('backBtn').style.display = ['finance','salesreport','auditlog'].includes(currentPage) ? 'block' : 'none';
+  document.getElementById('backBtn').style.display = ['salesreport','auditlog'].includes(currentPage) ? 'block' : 'none';
 
   // Bottom nav active
   const pages = ['dashboard','inbound','outbound','inventory','scan'];
@@ -1516,7 +1513,7 @@ function showPage() {
   // Sidebar active
   document.querySelectorAll('.sidebar-item').forEach(s => {
     const text = s.textContent.toLowerCase();
-    const map = { dashboard:'仪表盘', inbound:'入库', outbound:'出库', inventory:'库存', scan:'扫码', finance:'财务', salesreport:'销售报表', auditlog:'操作日志' };
+    const map = { dashboard:'仪表盘', inbound:'入库', outbound:'出库', inventory:'库存', scan:'扫码', salesreport:'报表', auditlog:'操作日志' };
     s.classList.toggle('active', text.includes(map[currentPage] || '---'));
   });
 
@@ -1525,7 +1522,6 @@ function showPage() {
   if (currentPage === 'inbound') renderInbound();
   if (currentPage === 'outbound') renderOutbound();
   if (currentPage === 'inventory') renderInventory();
-  if (currentPage === 'finance') renderFinance();
   if (currentPage === 'salesreport') renderSalesReport();
   if (currentPage === 'auditlog') renderAuditLog();
 }
@@ -1918,7 +1914,7 @@ function renderAuditLog() {
 let rptOverviewChart, rptMonthlyChart;
 
 function switchReportTab(tab) {
-  const tabs = ['overview','daily','monthly','hotproducts','outreport'];
+  const tabs = ['overview','daily','monthly','hotproducts','outreport','finance'];
   tabs.forEach(t => {
     const el = document.getElementById('rptTab-'+t);
     if(el) el.style.display = t===tab ? 'block' : 'none';
@@ -2057,6 +2053,12 @@ function renderSalesReport() {
       <td style="font-weight:700;color:var(--accent-green)">¥${(o.qty*(o.price||0)).toLocaleString()}</td>
       <td>${o.handler}</td>
     </tr>`).join('');
+  }
+
+  // Render finance tab if visible
+  const finTab = document.getElementById('rptTab-finance');
+  if (finTab && finTab.style.display !== 'none') {
+    renderFinance();
   }
 }
 
