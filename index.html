@@ -663,9 +663,19 @@ td {
   min-width: 0;
 }
 .unit-row input:focus { border-color: var(--primary); }
-.unit-row .unit-input { flex: 0.8; }
-.unit-row .qty-input { flex: 1; }
+.unit-row .unit-input { flex: 0.7; }
+.unit-row .qty-input { flex: 0.8; }
+.unit-row .price-input { flex: 0.9; }
 .unit-row .row-label { font-size: 11px; color: var(--text-light); white-space: nowrap; }
+.unit-row-wrap { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; flex: 1; min-width: 0; }
+.unit-row-field { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.unit-row-field .row-label { flex-shrink: 0; }
+@media (max-width: 420px) {
+  .unit-row { flex-wrap: wrap; padding: 8px; }
+  .unit-row-wrap { flex-direction: column; align-items: stretch; gap: 6px; }
+  .unit-row-field { width: 100%; }
+  .unit-row-field input { width: 100% !important; flex: 1; }
+}
 .remove-row-btn {
   background: none;
   border: none;
@@ -1017,7 +1027,7 @@ td {
         </div>
         <div class="table-wrapper">
           <table>
-            <thead><tr><th>日期</th><th>SKU</th><th>类型</th><th>数量</th><th>经手人</th></tr></thead>
+            <thead><tr><th>日期</th><th>SKU</th><th>类型</th><th>数量</th><th>单价</th><th>经手人</th></tr></thead>
             <tbody id="movementTable"></tbody>
           </table>
         </div>
@@ -1097,18 +1107,18 @@ td {
     <div class="form-group"><label>仓库</label><select id="in-warehouse"><option>主仓库</option></select></div>
     <div class="form-group"><label>商品SKU</label><input type="text" id="in-sku" placeholder="输入商品SKU"></div>
     <div class="unit-rows-container">
-      <div class="unit-rows-label">单位 &amp; 数量 / Unit &amp; Quantity</div>
+      <div class="unit-rows-label">单位 / 数量 / 单价</div>
       <div id="in-unit-rows">
         <div class="unit-row">
-          <span class="row-label">单位</span>
-          <input type="text" class="unit-input" placeholder="如: 个、箱、kg..." value="个">
-          <span class="row-label">数量</span>
-          <input type="number" class="qty-input" placeholder="数量" min="1">
+          <div class="unit-row-wrap">
+            <div class="unit-row-field"><span class="row-label">单位</span><input type="text" class="unit-input" placeholder="个、箱、kg、吨..." value="个"></div>
+            <div class="unit-row-field"><span class="row-label">数量</span><input type="number" class="qty-input" placeholder="数量" min="1"></div>
+            <div class="unit-row-field"><span class="row-label">单价</span><input type="number" class="price-input" placeholder="¥单价" step="0.01" min="0"></div>
+          </div>
         </div>
       </div>
       <button type="button" class="add-row-btn" onclick="addUnitRow('in-unit-rows')">＋ 添加更多单位</button>
     </div>
-    <div class="form-group"><label>采购单价</label><input type="number" id="in-cost" placeholder="输入单价" step="0.01"></div>
     <div class="form-group"><label>经手人</label><input type="text" id="in-handler" placeholder="输入经手人"></div>
     <div class="form-group"><label>备注</label><textarea id="in-notes" placeholder="备注信息"></textarea></div>
     <div class="modal-actions">
@@ -1125,18 +1135,18 @@ td {
     <div class="form-group"><label>仓库</label><select id="out-warehouse"><option>主仓库</option></select></div>
     <div class="form-group"><label>商品SKU</label><input type="text" id="out-sku" placeholder="输入商品SKU"></div>
     <div class="unit-rows-container">
-      <div class="unit-rows-label">单位 &amp; 数量 / Unit &amp; Quantity</div>
+      <div class="unit-rows-label">单位 / 数量 / 单价</div>
       <div id="out-unit-rows">
         <div class="unit-row">
-          <span class="row-label">单位</span>
-          <input type="text" class="unit-input" placeholder="如: 个、箱、kg..." value="个">
-          <span class="row-label">数量</span>
-          <input type="number" class="qty-input" placeholder="数量" min="1">
+          <div class="unit-row-wrap">
+            <div class="unit-row-field"><span class="row-label">单位</span><input type="text" class="unit-input" placeholder="个、箱、kg、吨..." value="个"></div>
+            <div class="unit-row-field"><span class="row-label">数量</span><input type="number" class="qty-input" placeholder="数量" min="1"></div>
+            <div class="unit-row-field"><span class="row-label">单价</span><input type="number" class="price-input" placeholder="¥单价" step="0.01" min="0"></div>
+          </div>
         </div>
       </div>
       <button type="button" class="add-row-btn" onclick="addUnitRow('out-unit-rows')">＋ 添加更多单位</button>
     </div>
-    <div class="form-group"><label>销售单价</label><input type="number" id="out-price" placeholder="输入单价" step="0.01"></div>
     <div class="form-group"><label>经手人</label><input type="text" id="out-handler" placeholder="输入经手人"></div>
     <div class="form-group"><label>备注</label><textarea id="out-notes" placeholder="备注信息"></textarea></div>
     <div class="modal-actions">
@@ -1390,7 +1400,7 @@ function renderInbound() {
     <td>${o.id}</td><td>${o.warehouse}</td>
     <td><span class="badge ${o.status}">${o.status==='completed'?'已完成':o.status==='pending'?'待处理':'已取消'}</span></td>
     <td>${o.handler}</td><td>${o.date}</td>
-    <td><div class="action-btns"><button class="action-btn view" onclick="alert('入库单: ${o.id}\\nSKU: ${o.sku}\\n数量: ${o.qty} ${o.unit||'个'}\\n单价: ¥${o.cost}/${o.unit||'个'}')">查看</button><button class="action-btn delete" onclick="deleteInbound(${i})">删除</button></div></td>
+    <td><div class="action-btns"><button class="action-btn view" onclick="alert('入库单: ${o.id}\\nSKU: ${o.sku}\\n数量: ${o.qty} ${o.unit||'个'}\\n单价: ¥${o.cost}/${o.unit||'个'}\\n小计: ¥${(o.qty*o.cost).toLocaleString()}')">查看</button><button class="action-btn delete" onclick="deleteInbound(${i})">删除</button></div></td>
   </tr>`).join('');
 }
 
@@ -1404,7 +1414,7 @@ function renderOutbound() {
       <td>${o.id}</td><td>${o.warehouse}</td>
       <td><span class="badge ${o.status}">${o.status==='completed'?'已完成':'待处理'}</span></td>
       <td>${o.handler}</td><td>${o.date}</td>
-      <td><div class="action-btns"><button class="action-btn view" onclick="alert('出库单: ${o.id}\\nSKU: ${o.sku}\\n数量: ${o.qty} ${o.unit||'个'}\\n单价: ¥${o.price}/${o.unit||'个'}')">查看</button><button class="action-btn delete" onclick="deleteOutbound(${i})">删除</button></div></td>
+      <td><div class="action-btns"><button class="action-btn view" onclick="alert('出库单: ${o.id}\\nSKU: ${o.sku}\\n数量: ${o.qty} ${o.unit||'个'}\\n单价: ¥${o.price}/${o.unit||'个'}\\n小计: ¥${(o.qty*o.price).toLocaleString()}')">查看</button><button class="action-btn delete" onclick="deleteOutbound(${i})">删除</button></div></td>
     </tr>`).join('');
   }
   const dtbody = document.getElementById('deliveryTable');
@@ -1417,25 +1427,48 @@ function renderOutbound() {
 
 function renderInventory() {
   const data = getStore();
-  const balances = {};
-  data.inboundOrders.filter(o=>o.status==='completed').forEach(o=>{if(!balances[o.sku])balances[o.sku]=0;balances[o.sku]+=o.qty;});
-  data.outboundOrders.filter(o=>o.status==='completed').forEach(o=>{if(!balances[o.sku])balances[o.sku]=0;balances[o.sku]-=o.qty;});
+  // Build balances per SKU per unit: { 'SKU-001': { '个': 50, '箱': 10 }, ... }
+  const balancesByUnit = {};
+  data.inboundOrders.filter(o=>o.status==='completed').forEach(o=>{
+    const u=o.unit||'个';
+    if(!balancesByUnit[o.sku])balancesByUnit[o.sku]={};
+    if(!balancesByUnit[o.sku][u])balancesByUnit[o.sku][u]=0;
+    balancesByUnit[o.sku][u]+=o.qty;
+  });
+  data.outboundOrders.filter(o=>o.status==='completed').forEach(o=>{
+    const u=o.unit||'个';
+    if(!balancesByUnit[o.sku])balancesByUnit[o.sku]={};
+    if(!balancesByUnit[o.sku][u])balancesByUnit[o.sku][u]=0;
+    balancesByUnit[o.sku][u]-=o.qty;
+  });
   const tbody = document.getElementById('balanceTable');
   const noData = document.getElementById('balanceNoData');
-  const rows = data.products.map(p=>({...p,warehouse:'主仓库',location:'A-01',qty:balances[p.sku]||0}));
+  // Generate one row per SKU+unit combination
+  const rows = [];
+  data.products.forEach(p=>{
+    const units = balancesByUnit[p.sku] || {};
+    const unitKeys = Object.keys(units);
+    if(unitKeys.length===0) {
+      rows.push({...p,warehouse:'主仓库',location:'A-01',unit:p.unit||'个',qty:0});
+    } else {
+      unitKeys.forEach(u=>{
+        rows.push({...p,warehouse:'主仓库',location:'A-01',unit:u,qty:units[u]||0});
+      });
+    }
+  });
   if(rows.length===0){tbody.innerHTML='';noData.style.display='block';}
   else { noData.style.display='none';
-    tbody.innerHTML = rows.map(r=>`<tr><td>${r.sku}</td><td>${r.name}</td><td>${r.color}</td><td>${r.unit||'个'}</td><td>${r.warehouse}</td><td>${r.location}</td><td style="font-weight:700;${r.qty<10?'color:var(--accent-red)':''}">${r.qty} ${r.unit||'个'}</td></tr>`).join('');
+    tbody.innerHTML = rows.map(r=>`<tr><td>${r.sku}</td><td>${r.name}</td><td>${r.color}</td><td>${r.unit}</td><td>${r.warehouse}</td><td>${r.location}</td><td style="font-weight:700;${r.qty<10?'color:var(--accent-red)':''}">${r.qty} ${r.unit}</td></tr>`).join('');
   }
   const mtbody = document.getElementById('movementTable');
   const mnoData = document.getElementById('movementNoData');
   const movements = [];
-  data.inboundOrders.forEach(o=>movements.push({date:o.date,sku:o.sku,type:'入库',qty:'+'+o.qty,handler:o.handler}));
-  data.outboundOrders.forEach(o=>movements.push({date:o.date,sku:o.sku,type:'出库',qty:'-'+o.qty,handler:o.handler}));
+  data.inboundOrders.forEach(o=>movements.push({date:o.date,sku:o.sku,type:'入库',qty:'+'+o.qty,unit:o.unit||'个',handler:o.handler,cost:o.cost}));
+  data.outboundOrders.forEach(o=>movements.push({date:o.date,sku:o.sku,type:'出库',qty:'-'+o.qty,unit:o.unit||'个',handler:o.handler,price:o.price}));
   movements.sort((a,b)=>b.date.localeCompare(a.date));
   if(movements.length===0){mtbody.innerHTML='';mnoData.style.display='block';}
   else { mnoData.style.display='none';
-    mtbody.innerHTML = movements.map(m=>`<tr><td>${m.date}</td><td>${m.sku}</td><td><span class="badge ${m.type==='入库'?'completed':'pending'}">${m.type}</span></td><td style="font-weight:700;color:${m.type==='入库'?'var(--accent-green)':'var(--accent-red)'}">${m.qty}</td><td>${m.handler}</td></tr>`).join('');
+    mtbody.innerHTML = movements.map(m=>`<tr><td>${m.date}</td><td>${m.sku}</td><td><span class="badge ${m.type==='入库'?'completed':'pending'}">${m.type}</span></td><td style="font-weight:700;color:${m.type==='入库'?'var(--accent-green)':'var(--accent-red)'}">${m.qty} ${m.unit}</td><td>¥${(m.cost||m.price||0)}/${m.unit}</td><td>${m.handler}</td></tr>`).join('');
   }
 }
 
@@ -1508,10 +1541,11 @@ function addUnitRow(containerId) {
   const row = document.createElement('div');
   row.className = 'unit-row';
   row.innerHTML = `
-    <span class="row-label">单位</span>
-    <input type="text" class="unit-input" placeholder="如: 个、箱、kg...">
-    <span class="row-label">数量</span>
-    <input type="number" class="qty-input" placeholder="数量" min="1">
+    <div class="unit-row-wrap">
+      <div class="unit-row-field"><span class="row-label">单位</span><input type="text" class="unit-input" placeholder="个、箱、kg、吨..."></div>
+      <div class="unit-row-field"><span class="row-label">数量</span><input type="number" class="qty-input" placeholder="数量" min="1"></div>
+      <div class="unit-row-field"><span class="row-label">单价</span><input type="number" class="price-input" placeholder="¥单价" step="0.01" min="0"></div>
+    </div>
     <button type="button" class="remove-row-btn" onclick="removeUnitRow(this)">&times;</button>
   `;
   container.appendChild(row);
@@ -1525,10 +1559,11 @@ function resetUnitRows(containerId) {
   const container = document.getElementById(containerId);
   container.innerHTML = `
     <div class="unit-row">
-      <span class="row-label">单位</span>
-      <input type="text" class="unit-input" placeholder="如: 个、箱、kg..." value="个">
-      <span class="row-label">数量</span>
-      <input type="number" class="qty-input" placeholder="数量" min="1">
+      <div class="unit-row-wrap">
+        <div class="unit-row-field"><span class="row-label">单位</span><input type="text" class="unit-input" placeholder="个、箱、kg、吨..." value="个"></div>
+        <div class="unit-row-field"><span class="row-label">数量</span><input type="number" class="qty-input" placeholder="数量" min="1"></div>
+        <div class="unit-row-field"><span class="row-label">单价</span><input type="number" class="price-input" placeholder="¥单价" step="0.01" min="0"></div>
+      </div>
     </div>
   `;
 }
@@ -1539,7 +1574,8 @@ function getUnitRows(containerId) {
   rows.forEach(row => {
     const unit = row.querySelector('.unit-input').value.trim();
     const qty = parseInt(row.querySelector('.qty-input').value) || 0;
-    if (unit && qty > 0) items.push({ unit, qty });
+    const price = parseFloat(row.querySelector('.price-input').value) || 0;
+    if (unit && qty > 0) items.push({ unit, qty, price });
   });
   return items;
 }
@@ -1547,46 +1583,43 @@ function getUnitRows(containerId) {
 function submitInbound() {
   const data=getStore();const now=new Date();const dateStr=now.toISOString().split('T')[0];
   const sku=document.getElementById('in-sku').value.trim();
-  const cost=parseFloat(document.getElementById('in-cost').value)||0;
   const handler=document.getElementById('in-handler').value.trim()||(getSession()?.username||'Admin');
   const notes=document.getElementById('in-notes').value.trim();
   const items=getUnitRows('in-unit-rows');
 
-  if(!sku||items.length===0){alert('请填写SKU，并至少添加一行单位和数量');return;}
+  if(!sku||items.length===0){alert('请填写SKU，并至少添加一行单位、数量和单价');return;}
 
-  // Create one order per unit row
   items.forEach((item, idx) => {
     const id='IN-'+dateStr.replace(/-/g,'')+'-'+String(data.inboundOrders.length+1).padStart(2,'0');
-    data.inboundOrders.push({id,warehouse:'主仓库',status:'completed',handler,date:dateStr,sku,qty:item.qty,cost,unit:item.unit,notes});
+    data.inboundOrders.push({id,warehouse:'主仓库',status:'completed',handler,date:dateStr,sku,qty:item.qty,cost:item.price,unit:item.unit,notes});
     const mk=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
     if(!data.monthlyData[mk])data.monthlyData[mk]={sales:0,purchase:0,returns:0,opex:0,orders:0};
-    data.monthlyData[mk].purchase+=item.qty*cost;
+    data.monthlyData[mk].purchase+=item.qty*item.price;
   });
 
   saveStore(data);closeModal('inbound');renderInbound();
-  ['in-sku','in-cost','in-handler','in-notes'].forEach(id=>document.getElementById(id).value='');
+  ['in-sku','in-handler','in-notes'].forEach(id=>document.getElementById(id).value='');
 }
 
 function submitOutbound() {
   const data=getStore();const now=new Date();const dateStr=now.toISOString().split('T')[0];
   const sku=document.getElementById('out-sku').value.trim();
-  const price=parseFloat(document.getElementById('out-price').value)||0;
   const handler=document.getElementById('out-handler').value.trim()||(getSession()?.username||'Admin');
   const notes=document.getElementById('out-notes').value.trim();
   const items=getUnitRows('out-unit-rows');
 
-  if(!sku||items.length===0){alert('请填写SKU，并至少添加一行单位和数量');return;}
+  if(!sku||items.length===0){alert('请填写SKU，并至少添加一行单位、数量和单价');return;}
 
   items.forEach((item, idx) => {
     const id='OUT-'+dateStr.replace(/-/g,'')+'-'+String(data.outboundOrders.length+1).padStart(2,'0');
-    data.outboundOrders.push({id,warehouse:'主仓库',status:'completed',handler,date:dateStr,sku,qty:item.qty,price,unit:item.unit,notes});
+    data.outboundOrders.push({id,warehouse:'主仓库',status:'completed',handler,date:dateStr,sku,qty:item.qty,price:item.price,unit:item.unit,notes});
     const mk=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
     if(!data.monthlyData[mk])data.monthlyData[mk]={sales:0,purchase:0,returns:0,opex:0,orders:0};
-    data.monthlyData[mk].sales+=item.qty*price;data.monthlyData[mk].orders+=1;
+    data.monthlyData[mk].sales+=item.qty*item.price;data.monthlyData[mk].orders+=1;
   });
 
   saveStore(data);closeModal('outbound');renderOutbound();
-  ['out-sku','out-price','out-handler','out-notes'].forEach(id=>document.getElementById(id).value='');
+  ['out-sku','out-handler','out-notes'].forEach(id=>document.getElementById(id).value='');
 }
 
 function deleteInbound(i){if(!confirm('确认删除？'))return;const d=getStore();d.inboundOrders.splice(i,1);saveStore(d);renderInbound();}
