@@ -917,11 +917,17 @@ td {
       <button class="sidebar-item" onclick="navigateTo('warehouses')">
         <span class="si-icon">🏭</span> 仓库管理 / Warehouses
       </button>
-      <button class="sidebar-item" onclick="navigateTo('settings')">
-        <span class="si-icon">⚙️</span> 设置 / Settings
+      <button class="sidebar-item" onclick="navigateTo('subscription')">
+        <span class="si-icon">📋</span> 订阅 / Subscription
       </button>
       <button class="sidebar-item" onclick="navigateTo('support')">
         <span class="si-icon">💬</span> 联系客服 / Support
+      </button>
+      <button class="sidebar-item" onclick="navigateTo('manual')">
+        <span class="si-icon">📖</span> 使用手册 / Manual
+      </button>
+      <button class="sidebar-item" onclick="navigateTo('settings')">
+        <span class="si-icon">⚙️</span> 设置 / Settings
       </button>
     </nav>
     <div class="sidebar-user">
@@ -1394,6 +1400,72 @@ td {
       </div>
     </div>
 
+    <!-- PAGE: Manual -->
+    <div class="page" id="page-manual">
+      <div class="card" style="text-align:center;padding:32px 24px">
+        <div style="font-size:56px;margin-bottom:8px">📖</div>
+        <h3 style="font-size:20px;font-weight:700;margin-bottom:4px">使用手册</h3>
+        <p style="color:var(--text-light);font-size:14px">点击任意章节展开</p>
+      </div>
+      <div id="manualAccordion"></div>
+    </div>
+
+    <!-- PAGE: Subscription -->
+    <div class="page" id="page-subscription">
+      <div class="card" style="background:linear-gradient(135deg,#fff7e6 0%,#ffe4b5 100%);border-left:4px solid #f5a623;padding:20px 24px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+          <span style="font-size:32px">🎁</span>
+          <div>
+            <h3 style="margin:0;font-size:16px;font-weight:700">试用期 — 免费使用中</h3>
+            <p style="margin:4px 0 0;color:#8a6d3b;font-size:13px">您目前处于免费试用阶段，所有功能均可免费使用。正式上线后将推出收费套餐。</p>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="background:#e8f5e9;border-left:4px solid #4caf50;padding:16px 24px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <span style="font-size:28px;color:#4caf50">✅</span>
+          <div>
+            <div style="font-weight:700;color:#2e7d32;font-size:15px">使用中 — 免费试用</div>
+            <div style="color:#558b2f;font-size:13px;margin-top:2px">试用期内享有完整功能，无需付费。</div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:16px">
+        <h3 style="font-size:16px;font-weight:700;margin-bottom:12px;padding:0 4px">选择套餐</h3>
+        <div class="card" style="background:#fffde7;padding:12px 20px;text-align:center;color:#8a6d3b;font-size:13px">
+          🔒 订阅套餐将在正式上线后开放。
+        </div>
+        <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap">
+          <div class="card" style="flex:1;min-width:140px;text-align:center;opacity:0.5;pointer-events:none;padding:20px 12px;position:relative">
+            <span style="position:absolute;top:8px;right:8px;font-size:14px">🔒</span>
+            <div style="font-weight:700;font-size:14px;color:var(--text-light)">Monthly</div>
+            <div style="font-size:28px;font-weight:800;color:var(--text-light);margin:8px 0 4px">₱299</div>
+            <div style="font-size:12px;color:var(--text-light)">1个月</div>
+            <div style="font-size:11px;color:var(--text-light);margin-top:4px">1 month full access</div>
+          </div>
+          <div class="card" style="flex:1;min-width:140px;text-align:center;opacity:0.5;pointer-events:none;padding:20px 12px;position:relative">
+            <span style="position:absolute;top:8px;right:8px;font-size:14px">🔒</span>
+            <div style="font-weight:700;font-size:14px;color:var(--text-light)">Quarterly</div>
+            <div style="font-size:28px;font-weight:800;color:var(--text-light);margin:8px 0 4px">₱799</div>
+            <div style="font-size:12px;color:var(--text-light)">3个月</div>
+            <div style="font-size:11px;color:var(--text-light);margin-top:4px">3 months full access · Save 11%</div>
+          </div>
+          <div class="card" style="flex:1;min-width:140px;text-align:center;opacity:0.5;pointer-events:none;padding:20px 12px;position:relative">
+            <span style="position:absolute;top:8px;right:8px;font-size:14px">🔒</span>
+            <div style="font-weight:700;font-size:14px;color:var(--text-light)">Yearly</div>
+            <div style="font-size:28px;font-weight:800;color:var(--text-light);margin:8px 0 4px">₱2999</div>
+            <div style="font-size:12px;color:var(--text-light)">1年</div>
+            <div style="font-size:11px;color:var(--text-light);margin-top:4px">1 year full access · Save 16%</div>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="background:#fffde7;text-align:center;padding:24px;margin-top:8px">
+        <div style="font-size:40px;margin-bottom:8px">🚀</div>
+        <h3 style="color:#f5a623;font-size:16px;margin-bottom:6px">收费套餐即将推出！</h3>
+        <p style="color:#8a6d3b;font-size:13px;margin:0">试用期结束前我们会提前通知您。正式上线时每个账号将获赠1个月免费使用。</p>
+      </div>
+    </div>
+
   </div><!-- /main-area -->
 </div><!-- /app-container -->
 
@@ -1543,8 +1615,10 @@ td {
   <button class="more-menu-item" onclick="navigateTo('customers');toggleMoreMenu()"><span class="mm-icon">👥</span>客户管理</button>
   <button class="more-menu-item" onclick="navigateTo('suppliers');toggleMoreMenu()"><span class="mm-icon">🏢</span>供应商</button>
   <button class="more-menu-item" onclick="navigateTo('warehouses');toggleMoreMenu()"><span class="mm-icon">🏭</span>仓库管理</button>
-  <button class="more-menu-item" onclick="navigateTo('settings');toggleMoreMenu()"><span class="mm-icon">⚙️</span>设置</button>
+  <button class="more-menu-item" onclick="navigateTo('subscription');toggleMoreMenu()"><span class="mm-icon">📋</span>订阅</button>
   <button class="more-menu-item" onclick="navigateTo('support');toggleMoreMenu()"><span class="mm-icon">💬</span>联系客服</button>
+  <button class="more-menu-item" onclick="navigateTo('manual');toggleMoreMenu()"><span class="mm-icon">📖</span>使用手册</button>
+  <button class="more-menu-item" onclick="navigateTo('settings');toggleMoreMenu()"><span class="mm-icon">⚙️</span>设置</button>
 </div>
 <div class="bottom-nav" id="bottomNav">
   <button class="nav-item active" onclick="navigateTo('dashboard')"><span class="nav-icon">📊</span><span>仪表盘</span></button>
@@ -1648,7 +1722,9 @@ function showApp() {
   document.getElementById('welcomeRole').textContent = session.role;
   document.getElementById('sidebarUserName').textContent = session.username;
   document.getElementById('sidebarUserRole').textContent = session.role;
-  navigateTo('dashboard');
+  const hash = window.location.hash.slice(1);
+  const validPages = Object.keys(pageTitles);
+  navigateTo(validPages.includes(hash) ? hash : 'dashboard');
 }
 
 // ===== DATA STORE =====
@@ -1722,7 +1798,8 @@ const pageTitles = {
   salesreport:'📊 报表 / Reports', auditlog:'操作日志 / Audit Log',
   customers:'👥 客户管理 / Customers', suppliers:'🏢 供应商 / Suppliers',
   warehouses:'🏭 仓库管理 / Warehouses', settings:'⚙️ 设置 / Settings',
-  support:'💬 联系客服 / Support'
+  support:'💬 联系客服 / Support', manual:'📖 使用手册 / Manual',
+  subscription:'📋 订阅 / Subscription'
 };
 const pageActions = {
   inbound: '<button class="header-btn" onclick="openModal(\'inbound\')">+ 新建入库单</button>',
@@ -1736,6 +1813,7 @@ function navigateTo(page) {
   if (page === currentPage && page !== 'dashboard') return;
   if (currentPage !== page) pageHistory.push(currentPage);
   currentPage = page;
+  window.location.hash = page;
   showPage();
 }
 function goBack() {
@@ -1750,7 +1828,7 @@ function showPage() {
   document.getElementById('headerTitle').textContent = pageTitles[currentPage] || '';
   const mobileLogout = '<button class="mobile-logout" onclick="handleLogout()">退出</button>';
   document.getElementById('headerActions').innerHTML = (pageActions[currentPage] || '') + mobileLogout;
-  document.getElementById('backBtn').style.display = ['salesreport','auditlog','customers','suppliers','warehouses','settings','support'].includes(currentPage) ? 'block' : 'none';
+  document.getElementById('backBtn').style.display = ['salesreport','auditlog','customers','suppliers','warehouses','settings','support','manual','subscription'].includes(currentPage) ? 'block' : 'none';
 
   // Bottom nav active
   const pages = ['dashboard','inbound','outbound','inventory','scan'];
@@ -1758,7 +1836,7 @@ function showPage() {
   // Sidebar active
   document.querySelectorAll('.sidebar-item').forEach(s => {
     const text = s.textContent.toLowerCase();
-    const map = { dashboard:'仪表盘', inbound:'入库', outbound:'出库', inventory:'库存', scan:'扫码', salesreport:'报表', auditlog:'操作日志', customers:'客户管理', suppliers:'供应商', warehouses:'仓库管理', settings:'设置', support:'联系客服' };
+    const map = { dashboard:'仪表盘', inbound:'入库', outbound:'出库', inventory:'库存', scan:'扫码', salesreport:'报表', auditlog:'操作日志', customers:'客户管理', suppliers:'供应商', warehouses:'仓库管理', settings:'设置', support:'联系客服', manual:'使用手册', subscription:'订阅' };
     s.classList.toggle('active', text.includes(map[currentPage] || '---'));
   });
 
@@ -1774,6 +1852,7 @@ function showPage() {
   if (currentPage === 'warehouses') renderWarehouses();
   if (currentPage === 'settings') renderSettings();
   if (currentPage === 'support') renderSupport();
+  if (currentPage === 'manual') renderManual();
 }
 
 // ===== RENDER FUNCTIONS =====
@@ -2610,7 +2689,54 @@ function sendSupportEmail() {
   logAction('联系客服', '发送邮件');
 }
 
+// ===== MANUAL PAGE =====
+function renderManual() {
+  const chapters = [
+    { icon:'📊', title:'仪表盘', body:'仪表盘显示整体库存概况。顶部卡片显示商品总数、仓库数量、入库单和出库单数量。右侧显示admin推送的公告。底部显示补货预警商品列表和最近的入库/出库记录。' },
+    { icon:'🛒', title:'商品管理', body:'在「库存」页面可查看所有商品的SKU、名称、分类、库存余额等信息。支持按关键词搜索和按分类筛选。点击商品可查看详细的入库/出库记录。' },
+    { icon:'📥', title:'入库管理', body:'进入「入库」页面，点击「+ 新建入库单」创建入库记录。填写SKU、商品名称、数量、单价等，提交后库存自动增加。支持按状态筛选查看历史入库单。' },
+    { icon:'📤', title:'出库管理', body:'进入「出库」页面，点击「+ 新建出库单」创建出库记录。选择已有商品，填写出库数量和单价。提交后库存自动扣减。可生成送货单打印。' },
+    { icon:'📦', title:'库存查询', body:'库存页面展示所有商品的实时库存余额。支持按商品名或SKU搜索，按分类筛选。库存低于阈值时会显示预警标识。' },
+    { icon:'📷', title:'扫码查询', body:'扫码查询功能支持通过摄像头扫描条形码/二维码快速查找商品信息。也可手动输入SKU编码进行查询。' },
+    { icon:'📱', title:'安装到手机桌面', body:'本系统支持PWA安装。在手机浏览器中打开系统，点击浏览器菜单中的「添加到主屏幕」即可像APP一样使用。iOS用Safari，Android用Chrome。' },
+    { icon:'⚙️', title:'设置', body:'设置页面可以管理个人信息、修改密码、管理团队成员（老板权限）、查看邀请码等。团队管理支持添加员工并分配角色权限。' },
+  ];
+  const el = document.getElementById('manualAccordion');
+  if (!el) return;
+  el.innerHTML = chapters.map((ch, i) => `
+    <div class="card" style="cursor:pointer;margin-bottom:8px" onclick="toggleManualSection(${i})">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:20px">${ch.icon}</span>
+          <span style="font-weight:600;font-size:15px">${ch.title}</span>
+        </div>
+        <span id="manualArrow${i}" style="transition:transform 0.2s;font-size:12px;color:var(--text-light)">▼</span>
+      </div>
+      <div id="manualBody${i}" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);color:var(--text-light);font-size:13px;line-height:1.8">
+        ${ch.body}
+      </div>
+    </div>
+  `).join('');
+}
+function toggleManualSection(i) {
+  const body = document.getElementById('manualBody'+i);
+  const arrow = document.getElementById('manualArrow'+i);
+  if (!body) return;
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  arrow.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+}
+
 // ===== INIT =====
+window.addEventListener('hashchange', () => {
+  const hash = window.location.hash.slice(1);
+  const validPages = Object.keys(pageTitles);
+  if (validPages.includes(hash) && hash !== currentPage) {
+    if (currentPage !== hash) pageHistory.push(currentPage);
+    currentPage = hash;
+    showPage();
+  }
+});
 document.addEventListener('DOMContentLoaded',()=>{
   const session=getSession();
   // Set default end date for reports
