@@ -798,6 +798,19 @@ td {
   .dash-grid { grid-template-columns: repeat(6, 1fr); }
   .finance-page .stat-row { grid-template-columns: repeat(6, 1fr); }
 }
+/* ===== FAQ ===== */
+.faq-item { border-bottom: 1px solid var(--border); padding: 14px 0; }
+.faq-item:last-child { border-bottom: none; }
+.faq-q { font-weight: 600; font-size: 14px; color: var(--accent-blue); }
+.faq-q::before { content: 'Q: '; }
+.faq-a { font-size: 13px; color: var(--text-light); margin-top: 6px; padding-left: 4px; line-height: 1.6; }
+.faq-a::before { content: 'A: '; color: var(--accent-green); font-weight: 600; }
+/* ===== Location Tags ===== */
+.location-tag { display: inline-flex; align-items: center; gap: 6px; background: #e8f4fd; color: var(--primary); padding: 6px 12px; border-radius: 6px; font-size: 13px; margin: 4px; }
+.location-tag .remove-loc { background: none; border: none; color: var(--accent-red); font-size: 16px; cursor: pointer; padding: 0; line-height: 1; }
+/* ===== Settings ===== */
+.settings-invite { display: flex; gap: 8px; align-items: center; background: #f7f8fa; padding: 12px; border-radius: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.settings-invite .code { font-weight: 700; font-size: 14px; color: var(--primary); letter-spacing: 2px; }
 </style>
 </head>
 <body>
@@ -895,6 +908,21 @@ td {
       <button class="sidebar-item" onclick="navigateTo('auditlog')">
         <span class="si-icon">📋</span> 操作日志 / Audit Log
       </button>
+      <button class="sidebar-item" onclick="navigateTo('customers')">
+        <span class="si-icon">👥</span> 客户管理 / Customers
+      </button>
+      <button class="sidebar-item" onclick="navigateTo('suppliers')">
+        <span class="si-icon">🏢</span> 供应商 / Suppliers
+      </button>
+      <button class="sidebar-item" onclick="navigateTo('warehouses')">
+        <span class="si-icon">🏭</span> 仓库管理 / Warehouses
+      </button>
+      <button class="sidebar-item" onclick="navigateTo('settings')">
+        <span class="si-icon">⚙️</span> 设置 / Settings
+      </button>
+      <button class="sidebar-item" onclick="navigateTo('support')">
+        <span class="si-icon">💬</span> 联系客服 / Support
+      </button>
     </nav>
     <div class="sidebar-user">
       <div class="su-info">
@@ -931,7 +959,7 @@ td {
           <div class="value" id="stat-products">12</div>
           <div class="icon">📦</div>
         </div>
-        <div class="dash-card">
+        <div class="dash-card" onclick="navigateTo('warehouses')">
           <div class="label">仓库</div>
           <div class="value" id="stat-warehouses">1</div>
           <div class="icon">🏭</div>
@@ -1262,8 +1290,193 @@ td {
       </div>
     </div>
 
+    <!-- PAGE: Customers -->
+    <div class="page" id="page-customers">
+      <div class="card">
+        <input type="text" placeholder="🔍 搜索客户... / Search customers" style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;outline:none;margin-bottom:16px;" id="customerSearch" oninput="renderCustomers()">
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>客户名称</th><th>电话</th><th>Email</th><th>地址</th><th>添加时间</th><th>操作</th></tr></thead>
+            <tbody id="customerTable"></tbody>
+          </table>
+        </div>
+        <div class="no-data" id="customerNoData" style="display:none">暂无数据 / No data</div>
+      </div>
+    </div>
+
+    <!-- PAGE: Suppliers -->
+    <div class="page" id="page-suppliers">
+      <div class="card">
+        <input type="text" placeholder="🔍 搜索供应商... / Search suppliers" style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;outline:none;margin-bottom:16px;" id="supplierSearch" oninput="renderSuppliers()">
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>供应商名称</th><th>电话</th><th>Email</th><th>地址</th><th>添加时间</th><th>操作</th></tr></thead>
+            <tbody id="supplierTable"></tbody>
+          </table>
+        </div>
+        <div class="no-data" id="supplierNoData" style="display:none">暂无数据 / No data</div>
+      </div>
+    </div>
+
+    <!-- PAGE: Warehouses -->
+    <div class="page" id="page-warehouses">
+      <div class="card">
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>名称 / Name</th><th>创建时间 / Created</th><th>操作 / Actions</th></tr></thead>
+            <tbody id="warehouseTable"></tbody>
+          </table>
+        </div>
+        <div class="no-data" id="warehouseNoData" style="display:none">暂无数据 / No data</div>
+      </div>
+    </div>
+
+    <!-- PAGE: Settings -->
+    <div class="page" id="page-settings">
+      <div class="card">
+        <div class="section-title">👤 个人信息 / Personal Info<span class="line"></span></div>
+        <div class="form-group"><label>姓名 / Name</label><input type="text" id="settings-name" placeholder="输入姓名"></div>
+        <div class="form-group"><label>邮箱 / Email</label><input type="email" id="settings-email" placeholder="输入邮箱"></div>
+        <div class="form-group"><label>角色 / Role</label><input type="text" id="settings-role" readonly style="background:#f7f8fa;cursor:not-allowed"></div>
+        <div class="form-group"><label>公司 / Company</label><input type="text" id="settings-company" placeholder="输入公司名称"></div>
+        <button class="btn-submit" style="width:auto;padding:10px 24px;border-radius:8px;border:none;font-size:14px;cursor:pointer;margin-top:4px" onclick="savePersonalInfo()">💾 保存 / Save</button>
+      </div>
+      <div class="card">
+        <div class="section-title">🌐 界面语言 / Language<span class="line"></span></div>
+        <div style="display:flex;gap:8px">
+          <button class="tab active" id="lang-zh" onclick="switchLanguage('zh')" style="padding:10px 20px;border-radius:8px">🇨🇳 中文</button>
+          <button class="tab" id="lang-en" onclick="switchLanguage('en')" style="padding:10px 20px;border-radius:8px">🇬🇧 English</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="section-title">👥 团队管理 / Team Management<span class="line"></span></div>
+        <div class="settings-invite">
+          <span style="font-size:13px;color:var(--text-light)">邀请码 (员工注册时输入此码加入)</span>
+          <span class="code" id="settings-invite-code"></span>
+          <button class="action-btn view" onclick="copyInviteCode()" style="margin-left:auto">📋 复制</button>
+        </div>
+        <button class="header-btn" style="background:var(--primary);margin-bottom:16px;display:inline-block" onclick="openModal('addMember')">+ 添加成员 / Add Member</button>
+        <div style="font-size:13px;color:var(--text-light);margin-bottom:8px">成员列表</div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>用户名</th><th>邮箱</th><th>角色</th><th>注册日期</th><th>操作</th></tr></thead>
+            <tbody id="teamTable"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="section-title">🔒 修改密码 / Change Password<span class="line"></span></div>
+        <div class="form-group"><label>当前密码</label><input type="password" id="settings-old-pass" placeholder="输入当前密码"></div>
+        <div class="form-group"><label>新密码 (至少6位)</label><input type="password" id="settings-new-pass" placeholder="输入新密码"></div>
+        <div class="form-group"><label>确认新密码</label><input type="password" id="settings-new-pass2" placeholder="再次输入新密码"></div>
+        <button class="btn-submit" style="width:auto;padding:10px 24px;border-radius:8px;border:none;font-size:14px;cursor:pointer;margin-top:4px" onclick="changePassword()">🔑 修改密码</button>
+      </div>
+    </div>
+
+    <!-- PAGE: Support -->
+    <div class="page" id="page-support">
+      <div class="card" style="text-align:center;padding:24px">
+        <div style="font-size:48px;margin-bottom:8px">💬</div>
+        <h3>联系客服 / Contact Support</h3>
+        <p style="color:var(--text-light);margin:8px 0 16px">如有任何问题，请发邮件给客服</p>
+        <a href="mailto:support@warehouse.com" style="display:inline-block;background:#e8f4fd;color:var(--accent-blue);font-weight:600;padding:10px 20px;border-radius:8px;text-decoration:none">📧 support@warehouse.com</a>
+      </div>
+      <div class="card">
+        <div class="section-title">📝 发送消息 / Send Message<span class="line"></span></div>
+        <div class="form-group"><label>主题 / Subject</label><input type="text" id="support-subject" placeholder="如：登录问题、功能建议..."></div>
+        <div class="form-group"><label>内容 / Content</label><textarea id="support-content" placeholder="请详细描述你遇到的问题..." style="min-height:120px"></textarea></div>
+        <button class="btn-submit" style="width:100%;padding:12px;border-radius:8px;border:none;font-size:14px;cursor:pointer;margin-top:4px" onclick="sendSupportEmail()">📤 发送邮件 / Send Email</button>
+        <p style="font-size:12px;color:var(--text-light);margin-top:6px">ℹ️ 点击将打开邮件客户端</p>
+      </div>
+      <div class="card">
+        <div class="section-title">❓ 常见问题 / FAQ<span class="line"></span></div>
+        <div id="faqList"></div>
+      </div>
+    </div>
+
   </div><!-- /main-area -->
 </div><!-- /app-container -->
+
+<!-- Modal: Customer -->
+<div class="modal-overlay" id="modal-customer">
+  <div class="modal">
+    <h2 id="customerModalTitle">👥 添加客户 / Add Customer</h2>
+    <input type="hidden" id="cust-edit-index" value="-1">
+    <div class="form-group"><label>客户名称 / Name</label><input type="text" id="cust-name" placeholder="输入客户名称"></div>
+    <div class="form-group"><label>电话 / Phone</label><input type="text" id="cust-phone" placeholder="输入电话号码"></div>
+    <div class="form-group"><label>Email</label><input type="email" id="cust-email" placeholder="输入Email"></div>
+    <div class="form-group"><label>地址 / Address</label><input type="text" id="cust-address" placeholder="输入地址"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('customer')">取消</button>
+      <button class="btn-submit" onclick="submitCustomer()">确认</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Supplier -->
+<div class="modal-overlay" id="modal-supplier">
+  <div class="modal">
+    <h2 id="supplierModalTitle">🏢 添加供应商 / Add Supplier</h2>
+    <input type="hidden" id="supp-edit-index" value="-1">
+    <div class="form-group"><label>供应商名称 / Name</label><input type="text" id="supp-name" placeholder="输入供应商名称"></div>
+    <div class="form-group"><label>电话 / Phone</label><input type="text" id="supp-phone" placeholder="输入电话号码"></div>
+    <div class="form-group"><label>Email</label><input type="email" id="supp-email" placeholder="输入Email"></div>
+    <div class="form-group"><label>地址 / Address</label><input type="text" id="supp-address" placeholder="输入地址"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('supplier')">取消</button>
+      <button class="btn-submit" onclick="submitSupplier()">确认</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Warehouse -->
+<div class="modal-overlay" id="modal-warehouse">
+  <div class="modal">
+    <h2 id="warehouseModalTitle">🏭 新增仓库 / New Warehouse</h2>
+    <input type="hidden" id="wh-edit-index" value="-1">
+    <div class="form-group"><label>仓库名称 / Name</label><input type="text" id="wh-name" placeholder="输入仓库名称"></div>
+    <div class="form-group"><label>初始库位 / Locations (逗号分隔)</label><input type="text" id="wh-locations" placeholder="A-01, A-02, B-01"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('warehouse')">取消</button>
+      <button class="btn-submit" onclick="submitWarehouse()">确认</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Warehouse Locations -->
+<div class="modal-overlay" id="modal-warehouseLocations">
+  <div class="modal">
+    <h2>📍 库位管理 / Locations</h2>
+    <div id="wh-locations-list" style="margin-bottom:12px"></div>
+    <div style="display:flex;gap:8px">
+      <input type="text" id="wh-new-location" placeholder="新库位名称" style="flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px">
+      <button class="btn-submit" style="flex:none;width:auto;padding:10px 16px;border:none;border-radius:8px;cursor:pointer" onclick="addWarehouseLocation()">+ 添加</button>
+    </div>
+    <div class="modal-actions" style="margin-top:16px">
+      <button class="btn-cancel" onclick="closeModal('warehouseLocations')">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Add Team Member -->
+<div class="modal-overlay" id="modal-addMember">
+  <div class="modal">
+    <h2>👥 添加成员 / Add Member</h2>
+    <div class="form-group"><label>用户名</label><input type="text" id="member-username" placeholder="输入用户名"></div>
+    <div class="form-group"><label>邮箱</label><input type="email" id="member-email" placeholder="输入邮箱"></div>
+    <div class="form-group"><label>密码 (至少6位)</label><input type="password" id="member-password" placeholder="输入初始密码"></div>
+    <div class="form-group"><label>角色</label>
+      <select id="member-role" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px">
+        <option value="staff">员工 / Staff</option>
+        <option value="owner">管理员 / Owner</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('addMember')">取消</button>
+      <button class="btn-submit" onclick="submitAddMember()">确认添加</button>
+    </div>
+  </div>
+</div>
 
 <!-- Modal: New Inbound -->
 <div class="modal-overlay" id="modal-inbound">
@@ -1327,6 +1540,11 @@ td {
   <button class="more-menu-item" onclick="navigateTo('scan');toggleMoreMenu()"><span class="mm-icon">📷</span>扫码查询</button>
   <button class="more-menu-item" onclick="navigateTo('salesreport');toggleMoreMenu()"><span class="mm-icon">📊</span>报表</button>
   <button class="more-menu-item" onclick="navigateTo('auditlog');toggleMoreMenu()"><span class="mm-icon">📋</span>操作日志</button>
+  <button class="more-menu-item" onclick="navigateTo('customers');toggleMoreMenu()"><span class="mm-icon">👥</span>客户管理</button>
+  <button class="more-menu-item" onclick="navigateTo('suppliers');toggleMoreMenu()"><span class="mm-icon">🏢</span>供应商</button>
+  <button class="more-menu-item" onclick="navigateTo('warehouses');toggleMoreMenu()"><span class="mm-icon">🏭</span>仓库管理</button>
+  <button class="more-menu-item" onclick="navigateTo('settings');toggleMoreMenu()"><span class="mm-icon">⚙️</span>设置</button>
+  <button class="more-menu-item" onclick="navigateTo('support');toggleMoreMenu()"><span class="mm-icon">💬</span>联系客服</button>
 </div>
 <div class="bottom-nav" id="bottomNav">
   <button class="nav-item active" onclick="navigateTo('dashboard')"><span class="nav-icon">📊</span><span>仪表盘</span></button>
@@ -1437,7 +1655,13 @@ function showApp() {
 const STORAGE_KEY = 'warehouse_data';
 function getStore() {
   const raw = localStorage.getItem(STORAGE_KEY);
-  if (raw) return JSON.parse(raw);
+  if (raw) {
+    const parsed = JSON.parse(raw);
+    if (!parsed.customers) parsed.customers = [];
+    if (!parsed.suppliers) parsed.suppliers = [];
+    if (!parsed.warehouses) parsed.warehouses = [{ id:'W-001', name:'主仓库', createdAt:'2026-01-01', locations:['A-01','A-02','B-01'] }];
+    return parsed;
+  }
   const defaultData = {
     inboundOrders: [
       { id:'IN-20260301', warehouse:'主仓库', status:'completed', handler:'Admin', date:'2026-03-01', sku:'SKU-001', qty:50, cost:120, unit:'个', notes:'首批采购' },
@@ -1467,12 +1691,27 @@ function getStore() {
       '2026-01':{ sales:44300, purchase:29800, returns:900, opex:0, orders:23 },
       '2026-02':{ sales:46700, purchase:30500, returns:700, opex:0, orders:24 },
       '2026-03':{ sales:52300, purchase:33800, returns:1200, opex:0, orders:28 },
-    }
+    },
+    customers: [
+      { id:'C-001', name:'客户A', phone:'13800138001', email:'customerA@example.com', address:'上海市浦东新区', createdAt:'2026-01-15' },
+      { id:'C-002', name:'客户B', phone:'13800138002', email:'customerB@example.com', address:'北京市朝阳区', createdAt:'2026-02-10' },
+    ],
+    suppliers: [
+      { id:'S-001', name:'供应商甲', phone:'13900139001', email:'supplierA@example.com', address:'广州市天河区', createdAt:'2026-01-05' },
+      { id:'S-002', name:'供应商乙', phone:'13900139002', email:'supplierB@example.com', address:'深圳市南山区', createdAt:'2026-02-20' },
+    ],
+    warehouses: [
+      { id:'W-001', name:'主仓库', createdAt:'2026-01-01', locations:['A-01','A-02','B-01'] },
+    ],
   };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultData));
   return defaultData;
 }
 function saveStore(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+
+const SETTINGS_KEY = 'warehouse_settings';
+function getSettings() { const raw=localStorage.getItem(SETTINGS_KEY); if(raw) return JSON.parse(raw); return {language:'zh', inviteCode:'INV-'+Math.random().toString(36).substr(2,8).toUpperCase()}; }
+function saveSettings(s) { localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); }
 
 // ===== NAVIGATION =====
 let currentPage = 'dashboard';
@@ -1480,11 +1719,17 @@ let pageHistory = [];
 const pageTitles = {
   dashboard:'仪表盘 / Dashboard', inbound:'入库单', outbound:'出库单',
   inventory:'库存 / Stock', scan:'扫码查询',
-  salesreport:'📊 报表 / Reports', auditlog:'操作日志 / Audit Log'
+  salesreport:'📊 报表 / Reports', auditlog:'操作日志 / Audit Log',
+  customers:'👥 客户管理 / Customers', suppliers:'🏢 供应商 / Suppliers',
+  warehouses:'🏭 仓库管理 / Warehouses', settings:'⚙️ 设置 / Settings',
+  support:'💬 联系客服 / Support'
 };
 const pageActions = {
   inbound: '<button class="header-btn" onclick="openModal(\'inbound\')">+ 新建入库单</button>',
   outbound: '<button class="header-btn" onclick="openModal(\'outbound\')">+ 新建出库单</button><button class="header-btn green">📄 送货单</button>',
+  customers: '<button class="header-btn" onclick="openModal(\'customer\')">+ 添加客户</button>',
+  suppliers: '<button class="header-btn" onclick="openModal(\'supplier\')">+ 添加供应商</button>',
+  warehouses: '<button class="header-btn" onclick="openModal(\'warehouse\')">+ 新增仓库</button>',
 };
 
 function navigateTo(page) {
@@ -1505,7 +1750,7 @@ function showPage() {
   document.getElementById('headerTitle').textContent = pageTitles[currentPage] || '';
   const mobileLogout = '<button class="mobile-logout" onclick="handleLogout()">退出</button>';
   document.getElementById('headerActions').innerHTML = (pageActions[currentPage] || '') + mobileLogout;
-  document.getElementById('backBtn').style.display = ['salesreport','auditlog'].includes(currentPage) ? 'block' : 'none';
+  document.getElementById('backBtn').style.display = ['salesreport','auditlog','customers','suppliers','warehouses','settings','support'].includes(currentPage) ? 'block' : 'none';
 
   // Bottom nav active
   const pages = ['dashboard','inbound','outbound','inventory','scan'];
@@ -1513,7 +1758,7 @@ function showPage() {
   // Sidebar active
   document.querySelectorAll('.sidebar-item').forEach(s => {
     const text = s.textContent.toLowerCase();
-    const map = { dashboard:'仪表盘', inbound:'入库', outbound:'出库', inventory:'库存', scan:'扫码', salesreport:'报表', auditlog:'操作日志' };
+    const map = { dashboard:'仪表盘', inbound:'入库', outbound:'出库', inventory:'库存', scan:'扫码', salesreport:'报表', auditlog:'操作日志', customers:'客户管理', suppliers:'供应商', warehouses:'仓库管理', settings:'设置', support:'联系客服' };
     s.classList.toggle('active', text.includes(map[currentPage] || '---'));
   });
 
@@ -1524,6 +1769,11 @@ function showPage() {
   if (currentPage === 'inventory') renderInventory();
   if (currentPage === 'salesreport') renderSalesReport();
   if (currentPage === 'auditlog') renderAuditLog();
+  if (currentPage === 'customers') renderCustomers();
+  if (currentPage === 'suppliers') renderSuppliers();
+  if (currentPage === 'warehouses') renderWarehouses();
+  if (currentPage === 'settings') renderSettings();
+  if (currentPage === 'support') renderSupport();
 }
 
 // ===== RENDER FUNCTIONS =====
@@ -1532,6 +1782,7 @@ function renderDashboard() {
   document.getElementById('stat-inbound').textContent = data.inboundOrders.length;
   document.getElementById('stat-outbound').textContent = data.outboundOrders.length;
   document.getElementById('stat-products').textContent = data.products.length;
+  document.getElementById('stat-warehouses').textContent = (data.warehouses||[]).length || 1;
   const cats = new Set(data.products.map(p => p.category));
   document.getElementById('stat-categories').textContent = cats.size;
   const md = data.monthlyData['2026-03'] || { sales:0, purchase:0 };
@@ -1624,11 +1875,12 @@ function renderInventory() {
   data.products.forEach(p=>{
     const units = balancesByUnit[p.sku] || {};
     const unitKeys = Object.keys(units);
+    const defaultWh = (data.warehouses && data.warehouses[0]?.name) || '主仓库';
     if(unitKeys.length===0) {
-      rows.push({...p,warehouse:'主仓库',location:'A-01',unit:p.unit||'个',qty:0});
+      rows.push({...p,warehouse:defaultWh,location:'A-01',unit:p.unit||'个',qty:0});
     } else {
       unitKeys.forEach(u=>{
-        rows.push({...p,warehouse:'主仓库',location:'A-01',unit:u,qty:units[u]||0});
+        rows.push({...p,warehouse:defaultWh,location:'A-01',unit:u,qty:units[u]||0});
       });
     }
   });
@@ -1705,9 +1957,11 @@ function renderFinance() {
 // ===== CRUD =====
 function openModal(type){
   document.getElementById('modal-'+type).classList.add('show');
-  // Reset to single row
-  const containerId = (type==='inbound'?'in':'out') + '-unit-rows';
-  resetUnitRows(containerId);
+  if (type === 'inbound' || type === 'outbound') {
+    populateWarehouseDropdowns();
+    const containerId = (type==='inbound'?'in':'out') + '-unit-rows';
+    resetUnitRows(containerId);
+  }
 }
 function closeModal(type){document.getElementById('modal-'+type).classList.remove('show');}
 
@@ -1767,7 +2021,7 @@ function submitInbound() {
 
   items.forEach((item, idx) => {
     const id='IN-'+dateStr.replace(/-/g,'')+'-'+String(data.inboundOrders.length+1).padStart(2,'0');
-    data.inboundOrders.push({id,warehouse:'主仓库',status:'completed',handler,date:dateStr,sku,qty:item.qty,cost:item.price,unit:item.unit,notes});
+    data.inboundOrders.push({id,warehouse:document.getElementById('in-warehouse').value,status:'completed',handler,date:dateStr,sku,qty:item.qty,cost:item.price,unit:item.unit,notes});
     const mk=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
     if(!data.monthlyData[mk])data.monthlyData[mk]={sales:0,purchase:0,returns:0,opex:0,orders:0};
     data.monthlyData[mk].purchase+=item.qty*item.price;
@@ -1789,7 +2043,7 @@ function submitOutbound() {
 
   items.forEach((item, idx) => {
     const id='OUT-'+dateStr.replace(/-/g,'')+'-'+String(data.outboundOrders.length+1).padStart(2,'0');
-    data.outboundOrders.push({id,warehouse:'主仓库',status:'completed',handler,date:dateStr,sku,qty:item.qty,price:item.price,unit:item.unit,notes});
+    data.outboundOrders.push({id,warehouse:document.getElementById('out-warehouse').value,status:'completed',handler,date:dateStr,sku,qty:item.qty,price:item.price,unit:item.unit,notes});
     const mk=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
     if(!data.monthlyData[mk])data.monthlyData[mk]={sales:0,purchase:0,returns:0,opex:0,orders:0};
     data.monthlyData[mk].sales+=item.qty*item.price;data.monthlyData[mk].orders+=1;
@@ -2060,6 +2314,300 @@ function renderSalesReport() {
   if (finTab && finTab.style.display !== 'none') {
     renderFinance();
   }
+}
+
+// ===== CUSTOMERS =====
+function renderCustomers() {
+  const data = getStore();
+  const search = (document.getElementById('customerSearch')?.value || '').toLowerCase();
+  let list = data.customers || [];
+  if (search) list = list.filter(c => c.name.toLowerCase().includes(search) || c.phone.includes(search) || c.email.toLowerCase().includes(search));
+  const tbody = document.getElementById('customerTable');
+  const noData = document.getElementById('customerNoData');
+  if (list.length === 0) { tbody.innerHTML = ''; noData.style.display = 'block'; return; }
+  noData.style.display = 'none';
+  tbody.innerHTML = list.map((c, i) => `<tr>
+    <td style="font-weight:600">${c.name}</td><td>${c.phone||'-'}</td><td>${c.email||'-'}</td>
+    <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.address||'-'}</td>
+    <td>${c.createdAt}</td>
+    <td><div class="action-btns">
+      <button class="action-btn edit" onclick="editCustomer(${i})">编辑</button>
+      <button class="action-btn delete" onclick="deleteCustomer(${i})">删除</button>
+    </div></td>
+  </tr>`).join('');
+}
+function editCustomer(i) {
+  const c = (getStore().customers||[])[i]; if(!c) return;
+  document.getElementById('cust-edit-index').value = i;
+  document.getElementById('cust-name').value = c.name;
+  document.getElementById('cust-phone').value = c.phone||'';
+  document.getElementById('cust-email').value = c.email||'';
+  document.getElementById('cust-address').value = c.address||'';
+  document.getElementById('customerModalTitle').textContent = '✏️ 编辑客户 / Edit Customer';
+  document.getElementById('modal-customer').classList.add('show');
+}
+function submitCustomer() {
+  const data = getStore(); if(!data.customers) data.customers = [];
+  const name = document.getElementById('cust-name').value.trim();
+  if (!name) { alert('请输入客户名称'); return; }
+  const obj = { name, phone: document.getElementById('cust-phone').value.trim(), email: document.getElementById('cust-email').value.trim(), address: document.getElementById('cust-address').value.trim() };
+  const idx = parseInt(document.getElementById('cust-edit-index').value);
+  if (idx >= 0) { data.customers[idx] = { ...data.customers[idx], ...obj }; logAction('编辑客户', '客户: '+name); }
+  else { obj.id = 'C-'+String(data.customers.length+1).padStart(3,'0'); obj.createdAt = new Date().toISOString().split('T')[0]; data.customers.push(obj); logAction('添加客户', '客户: '+name); }
+  saveStore(data); closeModal('customer'); renderCustomers();
+  ['cust-name','cust-phone','cust-email','cust-address'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('cust-edit-index').value = '-1';
+  document.getElementById('customerModalTitle').textContent = '👥 添加客户 / Add Customer';
+}
+function deleteCustomer(i) {
+  const data = getStore(); if(!confirm('确认删除该客户？')) return;
+  logAction('删除客户', '客户: '+data.customers[i].name);
+  data.customers.splice(i, 1); saveStore(data); renderCustomers();
+}
+
+// ===== SUPPLIERS =====
+function renderSuppliers() {
+  const data = getStore();
+  const search = (document.getElementById('supplierSearch')?.value || '').toLowerCase();
+  let list = data.suppliers || [];
+  if (search) list = list.filter(s => s.name.toLowerCase().includes(search) || s.phone.includes(search) || s.email.toLowerCase().includes(search));
+  const tbody = document.getElementById('supplierTable');
+  const noData = document.getElementById('supplierNoData');
+  if (list.length === 0) { tbody.innerHTML = ''; noData.style.display = 'block'; return; }
+  noData.style.display = 'none';
+  tbody.innerHTML = list.map((s, i) => `<tr>
+    <td style="font-weight:600">${s.name}</td><td>${s.phone||'-'}</td><td>${s.email||'-'}</td>
+    <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.address||'-'}</td>
+    <td>${s.createdAt}</td>
+    <td><div class="action-btns">
+      <button class="action-btn edit" onclick="editSupplier(${i})">编辑</button>
+      <button class="action-btn delete" onclick="deleteSupplier(${i})">删除</button>
+    </div></td>
+  </tr>`).join('');
+}
+function editSupplier(i) {
+  const s = (getStore().suppliers||[])[i]; if(!s) return;
+  document.getElementById('supp-edit-index').value = i;
+  document.getElementById('supp-name').value = s.name;
+  document.getElementById('supp-phone').value = s.phone||'';
+  document.getElementById('supp-email').value = s.email||'';
+  document.getElementById('supp-address').value = s.address||'';
+  document.getElementById('supplierModalTitle').textContent = '✏️ 编辑供应商 / Edit Supplier';
+  document.getElementById('modal-supplier').classList.add('show');
+}
+function submitSupplier() {
+  const data = getStore(); if(!data.suppliers) data.suppliers = [];
+  const name = document.getElementById('supp-name').value.trim();
+  if (!name) { alert('请输入供应商名称'); return; }
+  const obj = { name, phone: document.getElementById('supp-phone').value.trim(), email: document.getElementById('supp-email').value.trim(), address: document.getElementById('supp-address').value.trim() };
+  const idx = parseInt(document.getElementById('supp-edit-index').value);
+  if (idx >= 0) { data.suppliers[idx] = { ...data.suppliers[idx], ...obj }; logAction('编辑供应商', '供应商: '+name); }
+  else { obj.id = 'S-'+String(data.suppliers.length+1).padStart(3,'0'); obj.createdAt = new Date().toISOString().split('T')[0]; data.suppliers.push(obj); logAction('添加供应商', '供应商: '+name); }
+  saveStore(data); closeModal('supplier'); renderSuppliers();
+  ['supp-name','supp-phone','supp-email','supp-address'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('supp-edit-index').value = '-1';
+  document.getElementById('supplierModalTitle').textContent = '🏢 添加供应商 / Add Supplier';
+}
+function deleteSupplier(i) {
+  const data = getStore(); if(!confirm('确认删除该供应商？')) return;
+  logAction('删除供应商', '供应商: '+data.suppliers[i].name);
+  data.suppliers.splice(i, 1); saveStore(data); renderSuppliers();
+}
+
+// ===== WAREHOUSES =====
+let currentWhIndex = -1;
+function renderWarehouses() {
+  const data = getStore();
+  const list = data.warehouses || [];
+  const tbody = document.getElementById('warehouseTable');
+  const noData = document.getElementById('warehouseNoData');
+  if (list.length === 0) { tbody.innerHTML = ''; noData.style.display = 'block'; return; }
+  noData.style.display = 'none';
+  tbody.innerHTML = list.map((w, i) => `<tr>
+    <td style="font-weight:600">${w.name}</td>
+    <td>${w.createdAt}</td>
+    <td><div class="action-btns">
+      <button class="action-btn view" onclick="viewWarehouseLocations(${i})">📍 库位</button>
+      <button class="action-btn edit" onclick="editWarehouse(${i})">编辑</button>
+      <button class="action-btn delete" onclick="deleteWarehouse(${i})">删除</button>
+    </div></td>
+  </tr>`).join('');
+  const el = document.getElementById('stat-warehouses'); if(el) el.textContent = list.length;
+}
+function editWarehouse(i) {
+  const w = (getStore().warehouses||[])[i]; if(!w) return;
+  document.getElementById('wh-edit-index').value = i;
+  document.getElementById('wh-name').value = w.name;
+  document.getElementById('wh-locations').value = (w.locations||[]).join(', ');
+  document.getElementById('warehouseModalTitle').textContent = '✏️ 编辑仓库 / Edit Warehouse';
+  document.getElementById('modal-warehouse').classList.add('show');
+}
+function submitWarehouse() {
+  const data = getStore(); if(!data.warehouses) data.warehouses = [];
+  const name = document.getElementById('wh-name').value.trim();
+  if (!name) { alert('请输入仓库名称'); return; }
+  const locStr = document.getElementById('wh-locations').value.trim();
+  const locations = locStr ? locStr.split(',').map(s=>s.trim()).filter(Boolean) : [];
+  const idx = parseInt(document.getElementById('wh-edit-index').value);
+  if (idx >= 0) {
+    const oldName = data.warehouses[idx].name;
+    data.warehouses[idx] = { ...data.warehouses[idx], name, locations };
+    if (oldName !== name) {
+      data.inboundOrders.forEach(o => { if(o.warehouse===oldName) o.warehouse=name; });
+      data.outboundOrders.forEach(o => { if(o.warehouse===oldName) o.warehouse=name; });
+    }
+    logAction('编辑仓库', '仓库: '+name);
+  } else {
+    const id = 'W-'+String(data.warehouses.length+1).padStart(3,'0');
+    data.warehouses.push({ id, name, createdAt: new Date().toISOString().split('T')[0], locations });
+    logAction('新增仓库', '仓库: '+name);
+  }
+  saveStore(data); closeModal('warehouse'); renderWarehouses();
+  ['wh-name','wh-locations'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('wh-edit-index').value = '-1';
+  document.getElementById('warehouseModalTitle').textContent = '🏭 新增仓库 / New Warehouse';
+}
+function deleteWarehouse(i) {
+  const data = getStore();
+  if (data.warehouses.length <= 1) { alert('至少保留一个仓库'); return; }
+  if (!confirm('确认删除仓库「'+data.warehouses[i].name+'」？')) return;
+  logAction('删除仓库', '仓库: '+data.warehouses[i].name);
+  data.warehouses.splice(i, 1); saveStore(data); renderWarehouses();
+}
+function viewWarehouseLocations(i) {
+  currentWhIndex = i;
+  const w = (getStore().warehouses||[])[i]; if(!w) return;
+  const el = document.getElementById('wh-locations-list');
+  el.innerHTML = (w.locations||[]).map((loc, li) =>
+    `<span class="location-tag">${loc}<button class="remove-loc" onclick="removeWarehouseLocation(${li})">&times;</button></span>`
+  ).join('') || '<span style="color:var(--text-light);font-size:13px">暂无库位</span>';
+  document.getElementById('modal-warehouseLocations').classList.add('show');
+}
+function addWarehouseLocation() {
+  const input = document.getElementById('wh-new-location');
+  const name = input.value.trim(); if(!name) return;
+  const data = getStore();
+  if(!data.warehouses[currentWhIndex].locations) data.warehouses[currentWhIndex].locations = [];
+  data.warehouses[currentWhIndex].locations.push(name);
+  logAction('添加库位', data.warehouses[currentWhIndex].name+': '+name);
+  saveStore(data); input.value = ''; viewWarehouseLocations(currentWhIndex);
+}
+function removeWarehouseLocation(li) {
+  const data = getStore();
+  const removed = data.warehouses[currentWhIndex].locations[li];
+  logAction('删除库位', data.warehouses[currentWhIndex].name+': '+removed);
+  data.warehouses[currentWhIndex].locations.splice(li, 1);
+  saveStore(data); viewWarehouseLocations(currentWhIndex);
+}
+
+// ===== DYNAMIC WAREHOUSE DROPDOWN =====
+function populateWarehouseDropdowns() {
+  const data = getStore();
+  const whs = data.warehouses || [{ name:'主仓库' }];
+  const options = whs.map(w => `<option>${w.name}</option>`).join('');
+  const inSel = document.getElementById('in-warehouse');
+  const outSel = document.getElementById('out-warehouse');
+  if(inSel) inSel.innerHTML = options;
+  if(outSel) outSel.innerHTML = options;
+}
+
+// ===== SETTINGS =====
+function renderSettings() {
+  const session = getSession(); const users = getUsers();
+  const user = users.find(u => u.username === session.username);
+  const settings = getSettings();
+  document.getElementById('settings-name').value = user?.displayName || user?.username || '';
+  document.getElementById('settings-email').value = user?.email || '';
+  document.getElementById('settings-role').value = user?.role === 'owner' ? '管理员 / Owner' : '员工 / Staff';
+  document.getElementById('settings-company').value = user?.company || '';
+  document.getElementById('settings-invite-code').textContent = settings.inviteCode || 'N/A';
+  document.getElementById('lang-zh').classList.toggle('active', settings.language !== 'en');
+  document.getElementById('lang-en').classList.toggle('active', settings.language === 'en');
+  const tbody = document.getElementById('teamTable');
+  tbody.innerHTML = users.map((u, i) => `<tr>
+    <td style="font-weight:600">${u.username}</td>
+    <td>${u.email||'-'}</td>
+    <td><span class="badge ${u.role==='owner'?'completed':'pending'}">${u.role==='owner'?'管理员':'员工'}</span></td>
+    <td>${u.created||'-'}</td>
+    <td>${u.username !== session.username ? '<button class="action-btn delete" onclick="removeTeamMember('+i+')">移除</button>' : '<span style="color:var(--text-light);font-size:12px">当前用户</span>'}</td>
+  </tr>`).join('');
+}
+function savePersonalInfo() {
+  const session = getSession(); const users = getUsers();
+  const idx = users.findIndex(u => u.username === session.username); if(idx<0) return;
+  users[idx].displayName = document.getElementById('settings-name').value.trim();
+  users[idx].email = document.getElementById('settings-email').value.trim();
+  users[idx].company = document.getElementById('settings-company').value.trim();
+  saveUsers(users); session.email = users[idx].email; setSession(users[idx]);
+  logAction('更新个人信息', '用户: '+session.username);
+  alert('保存成功 / Saved!');
+}
+function switchLanguage(lang) {
+  const settings = getSettings(); settings.language = lang; saveSettings(settings);
+  document.getElementById('lang-zh').classList.toggle('active', lang === 'zh');
+  document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+  logAction('切换语言', lang === 'zh' ? '中文' : 'English');
+}
+function copyInviteCode() {
+  const code = document.getElementById('settings-invite-code').textContent;
+  navigator.clipboard.writeText(code).then(() => alert('邀请码已复制!'));
+}
+function changePassword() {
+  const session = getSession(); const users = getUsers();
+  const idx = users.findIndex(u => u.username === session.username);
+  const oldP = document.getElementById('settings-old-pass').value;
+  const newP = document.getElementById('settings-new-pass').value;
+  const newP2 = document.getElementById('settings-new-pass2').value;
+  if (users[idx].password !== oldP) { alert('当前密码错误'); return; }
+  if (newP.length < 6) { alert('新密码至少6个字符'); return; }
+  if (newP !== newP2) { alert('两次密码不一致'); return; }
+  users[idx].password = newP; saveUsers(users);
+  logAction('修改密码', '用户: '+session.username);
+  alert('密码修改成功!');
+  ['settings-old-pass','settings-new-pass','settings-new-pass2'].forEach(id => document.getElementById(id).value = '');
+}
+function submitAddMember() {
+  const username = document.getElementById('member-username').value.trim();
+  const email = document.getElementById('member-email').value.trim();
+  const password = document.getElementById('member-password').value;
+  const role = document.getElementById('member-role').value;
+  if (!username || username.length < 3) { alert('用户名至少3个字符'); return; }
+  if (password.length < 6) { alert('密码至少6个字符'); return; }
+  const users = getUsers();
+  if (users.find(u => u.username === username)) { alert('用户名已存在'); return; }
+  users.push({ username, password, email, role, created: new Date().toISOString().split('T')[0] });
+  saveUsers(users);
+  logAction('添加团队成员', '用户: '+username+' ('+role+')');
+  closeModal('addMember'); renderSettings();
+  ['member-username','member-email','member-password'].forEach(id => document.getElementById(id).value = '');
+}
+function removeTeamMember(i) {
+  const users = getUsers(); const session = getSession();
+  if (users[i].username === session.username) { alert('不能移除自己'); return; }
+  if (!confirm('确认移除成员「'+users[i].username+'」？')) return;
+  logAction('移除团队成员', '用户: '+users[i].username);
+  users.splice(i, 1); saveUsers(users); renderSettings();
+}
+
+// ===== SUPPORT =====
+function renderSupport() {
+  const faqData = [
+    { q:'如何创建入库单？', a:'进入「入库」页面，点击右上角「+ 新建入库单」按钮，填写商品SKU、数量、单价等信息后提交即可。' },
+    { q:'如何查看库存余额？', a:'进入「库存」页面，可按商品或仓库筛选查看当前库存余额。' },
+    { q:'如何添加新员工？', a:'进入「设置」→「团队管理」，点击「添加成员」填写用户名、密码和角色即可。' },
+    { q:'忘记密码怎么办？', a:'请联系系统管理员重置密码，或使用「设置」页面的修改密码功能。' },
+    { q:'如何管理仓库和库位？', a:'进入「仓库管理」页面，可新增/编辑仓库，点击「库位」按钮管理每个仓库的库位。' },
+    { q:'补货预警如何设置？', a:'系统自动监控库存，当某SKU余额低于预设阈值时会在仪表盘显示 ⚠️ 预警。' },
+  ];
+  const el = document.getElementById('faqList');
+  if(el) el.innerHTML = faqData.map(f => `<div class="faq-item"><div class="faq-q">${f.q}</div><div class="faq-a">${f.a}</div></div>`).join('');
+}
+function sendSupportEmail() {
+  const subject = encodeURIComponent(document.getElementById('support-subject').value.trim());
+  const content = encodeURIComponent(document.getElementById('support-content').value.trim());
+  if (!subject && !content) { alert('请填写主题和内容'); return; }
+  window.location.href = 'mailto:support@warehouse.com?subject='+subject+'&body='+content;
+  logAction('联系客服', '发送邮件');
 }
 
 // ===== INIT =====
