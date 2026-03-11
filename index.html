@@ -811,6 +811,43 @@ td {
 /* ===== Settings ===== */
 .settings-invite { display: flex; gap: 8px; align-items: center; background: #f7f8fa; padding: 12px; border-radius: 8px; margin-bottom: 16px; flex-wrap: wrap; }
 .settings-invite .code { font-weight: 700; font-size: 14px; color: var(--primary); letter-spacing: 2px; }
+/* ===== AI Finance Page ===== */
+.ai-banner { background:linear-gradient(135deg,#1a2332 0%,#2c4a7c 100%); border-radius:12px; padding:20px; margin-bottom:16px; color:#fff; box-shadow:0 4px 16px rgba(0,0,0,0.15); }
+.ai-banner .ai-header { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+.ai-banner .ai-icon { font-size:28px; }
+.ai-banner .ai-title { font-size:18px; font-weight:700; }
+.ai-banner .ai-subtitle { font-size:12px; opacity:0.7; }
+.ai-metrics-strip { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-top:12px; }
+.ai-metric { background:rgba(255,255,255,0.1); border-radius:8px; padding:10px; text-align:center; }
+.ai-metric .am-label { font-size:11px; opacity:0.8; }
+.ai-metric .am-value { font-size:20px; font-weight:700; margin-top:2px; }
+.ai-tabs { display:flex; gap:4px; overflow-x:auto; margin-bottom:16px; padding-bottom:4px; }
+.ai-tab-btn { white-space:nowrap; padding:8px 14px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; background:#f0f2f5; color:var(--text-light); transition:all .2s; }
+.ai-tab-btn.active { background:var(--primary); color:#fff; }
+.ai-stat-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:16px; }
+.ai-stat-box { background:var(--card); border-radius:10px; padding:14px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.05); }
+.ai-stat-box .asb-label { font-size:11px; color:var(--text-light); }
+.ai-stat-box .asb-value { font-size:22px; font-weight:800; margin-top:4px; color:var(--text); }
+.ai-stat-box .asb-sub { font-size:11px; color:var(--text-light); margin-top:2px; }
+.ai-insight-card { background:var(--card); border-radius:12px; padding:16px; margin-bottom:12px; box-shadow:0 2px 8px rgba(0,0,0,0.06); border-left:4px solid var(--border); }
+.ai-insight-card.high { border-left-color:#e74c3c; }
+.ai-insight-card.medium { border-left-color:#f39c12; }
+.ai-insight-card.low { border-left-color:#3498db; }
+.ai-insight-card.positive { border-left-color:#27ae60; }
+.insight-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+.insight-title { font-weight:700; font-size:14px; display:flex; align-items:center; gap:6px; }
+.insight-badge { font-size:11px; padding:2px 8px; border-radius:4px; font-weight:600; }
+.insight-badge.high { background:rgba(231,76,60,0.1); color:#e74c3c; }
+.insight-badge.medium { background:rgba(243,156,18,0.1); color:#f39c12; }
+.insight-badge.low { background:rgba(52,152,219,0.1); color:#3498db; }
+.insight-badge.positive { background:rgba(39,174,96,0.1); color:#27ae60; }
+.insight-body { font-size:13px; color:var(--text); line-height:1.6; }
+.insight-detail { font-size:12px; color:var(--text-light); margin-top:6px; font-style:italic; }
+.abc-badge { display:inline-block; padding:2px 10px; border-radius:4px; font-weight:700; font-size:12px; }
+.abc-badge.a { background:rgba(39,174,96,0.15); color:#27ae60; }
+.abc-badge.b { background:rgba(243,156,18,0.15); color:#f39c12; }
+.abc-badge.c { background:rgba(231,76,60,0.15); color:#e74c3c; }
+@media(min-width:768px){ .ai-stat-grid{grid-template-columns:repeat(6,1fr);} .ai-metric .am-value{font-size:24px;} }
 </style>
 </head>
 <body>
@@ -904,6 +941,9 @@ td {
       </button>
       <button class="sidebar-item" onclick="navigateTo('salesreport')">
         <span class="si-icon">📊</span> 报表 / Reports
+      </button>
+      <button class="sidebar-item" onclick="navigateTo('finance-ai')">
+        <span class="si-icon">🤖</span> AI财务分析 / AI Finance
       </button>
       <button class="sidebar-item" onclick="navigateTo('auditlog')">
         <span class="si-icon">📋</span> 操作日志 / Audit Log
@@ -1466,6 +1506,87 @@ td {
       </div>
     </div>
 
+    <!-- PAGE: AI Financial Analysis -->
+    <div class="page" id="page-finance-ai">
+      <!-- AI Banner -->
+      <div class="ai-banner">
+        <div class="ai-header">
+          <span class="ai-icon">🤖</span>
+          <div>
+            <div class="ai-title">AI 财务分析 / AI Financial Analysis</div>
+            <div class="ai-subtitle" id="aiLastUpdated">基于全部历史数据自动分析</div>
+          </div>
+        </div>
+        <div class="ai-metrics-strip">
+          <div class="ai-metric"><div class="am-label">整体毛利率</div><div class="am-value" id="aiBannerMargin">--</div></div>
+          <div class="ai-metric"><div class="am-label">库存周转率</div><div class="am-value" id="aiBannerTurnover">--</div></div>
+          <div class="ai-metric"><div class="am-label">首要预警</div><div class="am-value" id="aiBannerAlert" style="font-size:13px">--</div></div>
+        </div>
+      </div>
+      <!-- Tab Bar -->
+      <div class="ai-tabs">
+        <button class="ai-tab-btn active" onclick="switchAITab('overview')">📊 概览</button>
+        <button class="ai-tab-btn" onclick="switchAITab('margin')">📈 毛利率</button>
+        <button class="ai-tab-btn" onclick="switchAITab('turnover')">🔄 库存周转</button>
+        <button class="ai-tab-btn" onclick="switchAITab('abc')">📋 ABC分析</button>
+        <button class="ai-tab-btn" onclick="switchAITab('cost')">💰 成本结构</button>
+        <button class="ai-tab-btn" onclick="switchAITab('insights')">🤖 AI建议</button>
+      </div>
+      <!-- Tab: Overview -->
+      <div id="aiTab-overview">
+        <div class="ai-stat-grid" id="aiOverviewStats"></div>
+        <div class="card"><div class="section-title">📈 利润率趋势 / Margin Trend<span class="line"></span></div><div style="height:220px"><canvas id="aiChartMarginTrend"></canvas></div></div>
+        <div class="card" style="margin-top:12px"><div class="section-title">📊 营收 vs 成本 / Revenue vs Cost<span class="line"></span></div><div style="height:220px"><canvas id="aiChartRevCost"></canvas></div></div>
+      </div>
+      <!-- Tab: Gross Margin -->
+      <div id="aiTab-margin" style="display:none">
+        <div class="card" style="text-align:center;padding:20px">
+          <div style="font-size:12px;color:var(--text-light)">整体毛利率 / Overall Gross Margin</div>
+          <div id="aiOverallMargin" style="font-size:40px;font-weight:800;color:var(--accent-green);margin:8px 0">--%</div>
+          <div id="aiOverallMarginSub" style="font-size:12px;color:var(--text-light)"></div>
+        </div>
+        <div class="card" style="margin-top:12px"><div class="section-title">各产品毛利率 / Per-Product Margin<span class="line"></span></div><div style="height:220px"><canvas id="aiChartProductMargin"></canvas></div></div>
+        <div class="card" style="margin-top:12px">
+          <div class="section-title">毛利明细 / Margin Details<span class="line"></span></div>
+          <div style="overflow-x:auto"><table class="data-table"><thead><tr><th>产品</th><th>营收</th><th>成本(COGS)</th><th>毛利</th><th>毛利率</th></tr></thead><tbody id="aiMarginTable"></tbody></table></div>
+          <div class="no-data" id="aiMarginNoData" style="display:none">暂无数据</div>
+        </div>
+      </div>
+      <!-- Tab: Inventory Turnover -->
+      <div id="aiTab-turnover" style="display:none">
+        <div class="ai-stat-grid" style="grid-template-columns:repeat(3,1fr)" id="aiTurnoverStats"></div>
+        <div class="card"><div class="section-title">各产品周转率 / Turnover by Product<span class="line"></span></div><div style="height:220px"><canvas id="aiChartTurnover"></canvas></div></div>
+        <div class="card" style="margin-top:12px">
+          <div class="section-title">周转明细 / Turnover Details<span class="line"></span></div>
+          <div style="overflow-x:auto"><table class="data-table"><thead><tr><th>产品</th><th>COGS</th><th>库存量</th><th>库存价值</th><th>周转率</th><th>DSI(天)</th><th>GMROI</th></tr></thead><tbody id="aiTurnoverTable"></tbody></table></div>
+          <div class="no-data" id="aiTurnoverNoData" style="display:none">暂无数据</div>
+        </div>
+      </div>
+      <!-- Tab: ABC Analysis -->
+      <div id="aiTab-abc" style="display:none">
+        <div class="ai-stat-grid" style="grid-template-columns:repeat(3,1fr)" id="aiABCStats"></div>
+        <div class="card"><div class="section-title">帕累托分析 / Pareto Chart<span class="line"></span></div><div style="height:260px"><canvas id="aiChartPareto"></canvas></div></div>
+        <div class="card" style="margin-top:12px">
+          <div class="section-title">ABC分类明细 / Classification<span class="line"></span></div>
+          <div style="overflow-x:auto"><table class="data-table"><thead><tr><th>排名</th><th>产品</th><th>SKU</th><th>营收</th><th>占比%</th><th>累计%</th><th>分类</th></tr></thead><tbody id="aiABCTable"></tbody></table></div>
+        </div>
+      </div>
+      <!-- Tab: Cost Structure -->
+      <div id="aiTab-cost" style="display:none">
+        <div class="card"><div class="section-title">采购成本分布 / Cost Distribution<span class="line"></span></div><div style="height:240px"><canvas id="aiChartCostPie"></canvas></div></div>
+        <div class="card" style="margin-top:12px">
+          <div class="section-title">分类成本明细 / Cost by Category<span class="line"></span></div>
+          <div style="overflow-x:auto"><table class="data-table"><thead><tr><th>分类</th><th>总成本</th><th>占比%</th><th>数量</th><th>平均单价</th></tr></thead><tbody id="aiCostTable"></tbody></table></div>
+          <div class="no-data" id="aiCostNoData" style="display:none">暂无数据</div>
+        </div>
+      </div>
+      <!-- Tab: AI Insights -->
+      <div id="aiTab-insights" style="display:none">
+        <div id="aiInsightsList"></div>
+        <div class="no-data" id="aiInsightsNoData" style="display:none">暂无足够数据生成建议</div>
+      </div>
+    </div>
+
   </div><!-- /main-area -->
 </div><!-- /app-container -->
 
@@ -1611,6 +1732,7 @@ td {
 <div class="more-menu" id="moreMenu" style="display:none">
   <button class="more-menu-item" onclick="navigateTo('scan');toggleMoreMenu()"><span class="mm-icon">📷</span>扫码查询</button>
   <button class="more-menu-item" onclick="navigateTo('salesreport');toggleMoreMenu()"><span class="mm-icon">📊</span>报表</button>
+  <button class="more-menu-item" onclick="navigateTo('finance-ai');toggleMoreMenu()"><span class="mm-icon">🤖</span>AI财务分析</button>
   <button class="more-menu-item" onclick="navigateTo('auditlog');toggleMoreMenu()"><span class="mm-icon">📋</span>操作日志</button>
   <button class="more-menu-item" onclick="navigateTo('customers');toggleMoreMenu()"><span class="mm-icon">👥</span>客户管理</button>
   <button class="more-menu-item" onclick="navigateTo('suppliers');toggleMoreMenu()"><span class="mm-icon">🏢</span>供应商</button>
@@ -1799,7 +1921,7 @@ const pageTitles = {
   customers:'👥 客户管理 / Customers', suppliers:'🏢 供应商 / Suppliers',
   warehouses:'🏭 仓库管理 / Warehouses', settings:'⚙️ 设置 / Settings',
   support:'💬 联系客服 / Support', manual:'📖 使用手册 / Manual',
-  subscription:'📋 订阅 / Subscription'
+  subscription:'📋 订阅 / Subscription', 'finance-ai':'🤖 AI财务分析 / AI Financial Analysis'
 };
 const pageActions = {
   inbound: '<button class="header-btn" onclick="openModal(\'inbound\')">+ 新建入库单</button>',
@@ -1828,7 +1950,7 @@ function showPage() {
   document.getElementById('headerTitle').textContent = pageTitles[currentPage] || '';
   const mobileLogout = '<button class="mobile-logout" onclick="handleLogout()">退出</button>';
   document.getElementById('headerActions').innerHTML = (pageActions[currentPage] || '') + mobileLogout;
-  document.getElementById('backBtn').style.display = ['salesreport','auditlog','customers','suppliers','warehouses','settings','support','manual','subscription'].includes(currentPage) ? 'block' : 'none';
+  document.getElementById('backBtn').style.display = ['salesreport','auditlog','customers','suppliers','warehouses','settings','support','manual','subscription','finance-ai'].includes(currentPage) ? 'block' : 'none';
 
   // Bottom nav active
   const pages = ['dashboard','inbound','outbound','inventory','scan'];
@@ -1836,7 +1958,7 @@ function showPage() {
   // Sidebar active
   document.querySelectorAll('.sidebar-item').forEach(s => {
     const text = s.textContent.toLowerCase();
-    const map = { dashboard:'仪表盘', inbound:'入库', outbound:'出库', inventory:'库存', scan:'扫码', salesreport:'报表', auditlog:'操作日志', customers:'客户管理', suppliers:'供应商', warehouses:'仓库管理', settings:'设置', support:'联系客服', manual:'使用手册', subscription:'订阅' };
+    const map = { dashboard:'仪表盘', inbound:'入库', outbound:'出库', inventory:'库存', scan:'扫码', salesreport:'报表', 'finance-ai':'ai财务分析', auditlog:'操作日志', customers:'客户管理', suppliers:'供应商', warehouses:'仓库管理', settings:'设置', support:'联系客服', manual:'使用手册', subscription:'订阅' };
     s.classList.toggle('active', text.includes(map[currentPage] || '---'));
   });
 
@@ -1853,6 +1975,7 @@ function showPage() {
   if (currentPage === 'settings') renderSettings();
   if (currentPage === 'support') renderSupport();
   if (currentPage === 'manual') renderManual();
+  if (currentPage === 'finance-ai') renderFinanceAI();
 }
 
 // ===== RENDER FUNCTIONS =====
@@ -2725,6 +2848,211 @@ function toggleManualSection(i) {
   const isOpen = body.style.display !== 'none';
   body.style.display = isOpen ? 'none' : 'block';
   arrow.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+}
+
+// ===== AI FINANCIAL ANALYSIS =====
+let aiC1,aiC2,aiC3,aiC4,aiC5,aiC6;
+
+function switchAITab(tab) {
+  const tabs=['overview','margin','turnover','abc','cost','insights'];
+  tabs.forEach(t => { const el=document.getElementById('aiTab-'+t); if(el) el.style.display=(t===tab)?'block':'none'; });
+  document.querySelectorAll('.ai-tab-btn').forEach((btn,i) => btn.classList.toggle('active', tabs[i]===tab));
+}
+
+function calcProductFinancials(completedIn, completedOut, products) {
+  const r={};
+  products.forEach(p => { r[p.sku]={name:p.name,category:p.category,revenue:0,cogs:0,qtySold:0,qtyIn:0,totalCost:0}; });
+  completedOut.forEach(o => { if(!r[o.sku]) r[o.sku]={name:o.sku,category:'其他',revenue:0,cogs:0,qtySold:0,qtyIn:0,totalCost:0}; r[o.sku].revenue+=o.qty*(o.price||0); r[o.sku].qtySold+=o.qty; });
+  completedIn.forEach(o => { if(!r[o.sku]) r[o.sku]={name:o.sku,category:'其他',revenue:0,cogs:0,qtySold:0,qtyIn:0,totalCost:0}; r[o.sku].totalCost+=o.qty*(o.cost||0); r[o.sku].qtyIn+=o.qty; });
+  Object.values(r).forEach(p => {
+    const avgCost=p.qtyIn>0?p.totalCost/p.qtyIn:0;
+    p.cogs=avgCost*p.qtySold; p.grossProfit=p.revenue-p.cogs;
+    p.grossMargin=p.revenue>0?(p.grossProfit/p.revenue*100):0;
+    p.avgCost=avgCost;
+    p.currentStock=p.qtyIn-p.qtySold;
+    p.inventoryValue=p.currentStock*avgCost;
+  });
+  return r;
+}
+
+function renderFinanceAI() {
+  const data=getStore();
+  const cIn=data.inboundOrders.filter(o=>o.status==='completed');
+  const cOut=data.outboundOrders.filter(o=>o.status==='completed');
+  const pf=calcProductFinancials(cIn,cOut,data.products);
+  const pfArr=Object.entries(pf).filter(([,v])=>v.revenue>0||v.totalCost>0);
+
+  // Overall metrics
+  const totalRev=pfArr.reduce((s,[,v])=>s+v.revenue,0);
+  const totalCOGS=pfArr.reduce((s,[,v])=>s+v.cogs,0);
+  const totalGP=totalRev-totalCOGS;
+  const overallMargin=totalRev>0?(totalGP/totalRev*100):0;
+  const totalInvValue=pfArr.reduce((s,[,v])=>s+Math.max(0,v.inventoryValue),0);
+  const turnoverRate=totalInvValue>0?(totalCOGS/totalInvValue):0;
+  const dsi=turnoverRate>0?(365/turnoverRate):0;
+  const gmroi=totalInvValue>0?(totalGP/totalInvValue):0;
+
+  // MoM trend
+  const now=new Date(); const curKey=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const prev=new Date(now.getFullYear(),now.getMonth()-1); const prevKey=`${prev.getFullYear()}-${String(prev.getMonth()+1).padStart(2,'0')}`;
+  const curMD=data.monthlyData[curKey]||{sales:0,purchase:0,opex:0};
+  const prevMD=data.monthlyData[prevKey]||{sales:0,purchase:0,opex:0};
+  const momGrowth=prevMD.sales>0?((curMD.sales-prevMD.sales)/prevMD.sales*100):0;
+  const costRatio=totalRev>0?(totalCOGS/totalRev*100):0;
+
+  // Banner
+  document.getElementById('aiBannerMargin').textContent=overallMargin.toFixed(1)+'%';
+  document.getElementById('aiBannerTurnover').textContent=turnoverRate.toFixed(1)+'x';
+  const topAlert=overallMargin<15?'⚠️ 毛利偏低':turnoverRate<1?'⚠️ 周转偏慢':'✅ 指标健康';
+  document.getElementById('aiBannerAlert').textContent=topAlert;
+  document.getElementById('aiLastUpdated').textContent='数据更新: '+new Date().toLocaleString('zh-CN');
+
+  // === TAB: Overview ===
+  document.getElementById('aiOverviewStats').innerHTML=[
+    {l:'整体毛利率',v:overallMargin.toFixed(1)+'%',s:'Gross Margin'},
+    {l:'库存周转率',v:turnoverRate.toFixed(1)+'x',s:'Inventory Turnover'},
+    {l:'库存天数(DSI)',v:dsi>0?dsi.toFixed(0)+'天':'N/A',s:'Days Sales in Inventory'},
+    {l:'GMROI',v:gmroi.toFixed(2),s:'Gross Margin ROI'},
+    {l:'环比增长',v:(momGrowth>=0?'+':'')+momGrowth.toFixed(1)+'%',s:'MoM Sales Growth'},
+    {l:'成本占比',v:costRatio.toFixed(1)+'%',s:'COGS / Revenue'},
+  ].map(x=>`<div class="ai-stat-box"><div class="asb-label">${x.l}</div><div class="asb-value">${x.v}</div><div class="asb-sub">${x.s}</div></div>`).join('');
+
+  // Chart 1: Margin Trend
+  const months6=[],mLabels=[];
+  for(let i=5;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i); months6.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`); mLabels.push(`${d.getMonth()+1}月`);}
+  const mMargins=months6.map(m=>{const md=data.monthlyData[m]||{sales:0,purchase:0,opex:0}; const p=md.sales-md.purchase-(md.opex||0); return md.sales>0?(p/md.sales*100):0;});
+  if(aiC1)aiC1.destroy();
+  aiC1=new Chart(document.getElementById('aiChartMarginTrend').getContext('2d'),{
+    type:'line',data:{labels:mLabels,datasets:[{label:'利润率%',data:mMargins,borderColor:'#27ae60',backgroundColor:'rgba(39,174,96,0.1)',fill:true,tension:0.4,pointRadius:5,pointBackgroundColor:'#27ae60'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>v.toFixed(0)+'%'},grid:{color:'#f0f0f0'}},x:{grid:{display:false}}}}
+  });
+
+  // Chart 2: Revenue vs Cost
+  const mSales=months6.map(m=>(data.monthlyData[m]||{}).sales||0);
+  const mPurch=months6.map(m=>(data.monthlyData[m]||{}).purchase||0);
+  if(aiC2)aiC2.destroy();
+  aiC2=new Chart(document.getElementById('aiChartRevCost').getContext('2d'),{
+    type:'bar',data:{labels:mLabels,datasets:[{label:'营收',data:mSales,backgroundColor:'rgba(52,152,219,0.8)',borderRadius:4},{label:'成本',data:mPurch,backgroundColor:'rgba(231,76,60,0.7)',borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:12,font:{size:11}}}},scales:{y:{ticks:{callback:v=>'¥'+(v/1000)+'k'},grid:{color:'#f0f0f0'}},x:{grid:{display:false}}}}
+  });
+
+  // === TAB: Gross Margin ===
+  document.getElementById('aiOverallMargin').textContent=overallMargin.toFixed(1)+'%';
+  document.getElementById('aiOverallMarginSub').textContent=`总营收 ¥${totalRev.toLocaleString()} | 总成本 ¥${totalCOGS.toLocaleString()} | 毛利 ¥${totalGP.toLocaleString()}`;
+  const marginData=pfArr.filter(([,v])=>v.revenue>0).sort((a,b)=>b[1].grossMargin-a[1].grossMargin);
+  if(aiC3)aiC3.destroy();
+  aiC3=new Chart(document.getElementById('aiChartProductMargin').getContext('2d'),{
+    type:'bar',data:{labels:marginData.map(([,v])=>v.name),datasets:[{label:'毛利率%',data:marginData.map(([,v])=>v.grossMargin),backgroundColor:marginData.map(([,v])=>v.grossMargin>=15?'rgba(39,174,96,0.7)':'rgba(231,76,60,0.7)'),borderRadius:4}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{callback:v=>v+'%'},grid:{color:'#f0f0f0'}},y:{grid:{display:false}}}}
+  });
+  const mtb=document.getElementById('aiMarginTable');
+  const mnd=document.getElementById('aiMarginNoData');
+  if(marginData.length===0){mtb.innerHTML='';mnd.style.display='block';}
+  else{mnd.style.display='none'; mtb.innerHTML=marginData.map(([sku,v])=>`<tr><td style="font-weight:600">${v.name}</td><td>¥${v.revenue.toLocaleString()}</td><td>¥${v.cogs.toLocaleString()}</td><td style="color:${v.grossProfit>=0?'var(--accent-green)':'var(--accent-red)'};font-weight:700">¥${v.grossProfit.toLocaleString()}</td><td style="font-weight:700;color:${v.grossMargin>=15?'var(--accent-green)':'var(--accent-red)'}">${v.grossMargin.toFixed(1)}%</td></tr>`).join('');}
+
+  // === TAB: Inventory Turnover ===
+  document.getElementById('aiTurnoverStats').innerHTML=[
+    {l:'整体周转率',v:turnoverRate.toFixed(1)+'x'},{l:'DSI(天)',v:dsi>0?dsi.toFixed(0):'N/A'},{l:'平均库存价值',v:'¥'+totalInvValue.toLocaleString()}
+  ].map(x=>`<div class="ai-stat-box"><div class="asb-label">${x.l}</div><div class="asb-value">${x.v}</div></div>`).join('');
+
+  const turnData=pfArr.filter(([,v])=>v.inventoryValue>0).map(([sku,v])=>{
+    const tr=v.inventoryValue>0?(v.cogs/v.inventoryValue):0;
+    const ds=tr>0?(365/tr):0;
+    const gm=v.inventoryValue>0?(v.grossProfit/v.inventoryValue):0;
+    return {sku,name:v.name,cogs:v.cogs,stock:v.currentStock,invVal:v.inventoryValue,turnover:tr,dsi:ds,gmroi:gm};
+  }).sort((a,b)=>b.turnover-a.turnover);
+
+  if(aiC4)aiC4.destroy();
+  if(turnData.length>0){
+    aiC4=new Chart(document.getElementById('aiChartTurnover').getContext('2d'),{
+      type:'bar',data:{labels:turnData.map(d=>d.name),datasets:[{label:'周转率',data:turnData.map(d=>d.turnover),backgroundColor:turnData.map(d=>d.turnover>=2?'rgba(39,174,96,0.7)':d.turnover>=1?'rgba(243,156,18,0.7)':'rgba(231,76,60,0.7)'),borderRadius:4}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:'#f0f0f0'}},x:{grid:{display:false}}}}
+    });
+  }
+  const ttb=document.getElementById('aiTurnoverTable'); const tnd=document.getElementById('aiTurnoverNoData');
+  if(turnData.length===0){ttb.innerHTML='';tnd.style.display='block';}
+  else{tnd.style.display='none'; ttb.innerHTML=turnData.map(d=>`<tr><td style="font-weight:600">${d.name}</td><td>¥${d.cogs.toLocaleString()}</td><td>${d.stock}</td><td>¥${d.invVal.toLocaleString()}</td><td style="font-weight:700;color:${d.turnover>=2?'var(--accent-green)':d.turnover>=1?'var(--accent-orange)':'var(--accent-red)'}">${d.turnover.toFixed(1)}x</td><td>${d.dsi>0?d.dsi.toFixed(0)+'天':'N/A'}</td><td style="font-weight:700">${d.gmroi.toFixed(2)}</td></tr>`).join('');}
+
+  // === TAB: ABC Analysis ===
+  const abcData=pfArr.filter(([,v])=>v.revenue>0).sort((a,b)=>b[1].revenue-a[1].revenue);
+  const abcTotal=abcData.reduce((s,[,v])=>s+v.revenue,0);
+  let cumul=0; const abcRows=abcData.map(([sku,v],i)=>{
+    cumul+=v.revenue; const pct=abcTotal>0?(v.revenue/abcTotal*100):0; const cPct=abcTotal>0?(cumul/abcTotal*100):0;
+    const cls=cPct<=80?'a':cPct<=95?'b':'c';
+    return {sku,name:v.name,revenue:v.revenue,pct,cPct,cls,rank:i+1};
+  });
+  const aCount=abcRows.filter(r=>r.cls==='a').length;
+  const bCount=abcRows.filter(r=>r.cls==='b').length;
+  const cCount=abcRows.filter(r=>r.cls==='c').length;
+  document.getElementById('aiABCStats').innerHTML=[
+    {l:'A类 (核心)',v:aCount+'个',s:'贡献80%营收'},{l:'B类 (重要)',v:bCount+'个',s:'贡献15%营收'},{l:'C类 (一般)',v:cCount+'个',s:'贡献5%营收'}
+  ].map(x=>`<div class="ai-stat-box"><div class="asb-label">${x.l}</div><div class="asb-value">${x.v}</div><div class="asb-sub">${x.s}</div></div>`).join('');
+
+  // Pareto Chart
+  if(aiC5)aiC5.destroy();
+  if(abcRows.length>0){
+    aiC5=new Chart(document.getElementById('aiChartPareto').getContext('2d'),{
+      type:'bar',data:{labels:abcRows.map(r=>r.name),datasets:[
+        {label:'营收',data:abcRows.map(r=>r.revenue),backgroundColor:abcRows.map(r=>r.cls==='a'?'rgba(39,174,96,0.7)':r.cls==='b'?'rgba(243,156,18,0.7)':'rgba(231,76,60,0.5)'),borderRadius:4,yAxisID:'y'},
+        {label:'累计%',data:abcRows.map(r=>r.cPct),type:'line',borderColor:'#3498db',backgroundColor:'transparent',tension:0.3,pointRadius:4,pointBackgroundColor:'#3498db',yAxisID:'y1'}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:12,font:{size:11}}}},scales:{y:{position:'left',ticks:{callback:v=>'¥'+(v/1000)+'k'},grid:{color:'#f0f0f0'}},y1:{position:'right',min:0,max:100,ticks:{callback:v=>v+'%'},grid:{display:false}},x:{grid:{display:false}}}}
+    });
+  }
+  const atb=document.getElementById('aiABCTable');
+  atb.innerHTML=abcRows.map(r=>`<tr><td style="font-weight:700;color:${r.rank<=3?'var(--accent-orange)':'var(--text)'}">${r.rank}</td><td style="font-weight:600">${r.name}</td><td style="font-size:12px;color:var(--text-light)">${r.sku}</td><td>¥${r.revenue.toLocaleString()}</td><td>${r.pct.toFixed(1)}%</td><td>${r.cPct.toFixed(1)}%</td><td><span class="abc-badge ${r.cls}">${r.cls.toUpperCase()}</span></td></tr>`).join('');
+
+  // === TAB: Cost Structure ===
+  const catCost={};
+  cIn.forEach(o=>{const p=data.products.find(pp=>pp.sku===o.sku); const cat=p?p.category:'其他'; if(!catCost[cat])catCost[cat]={cost:0,qty:0}; catCost[cat].cost+=o.qty*(o.cost||0); catCost[cat].qty+=o.qty;});
+  const catArr=Object.entries(catCost).sort((a,b)=>b[1].cost-a[1].cost);
+  const catTotal=catArr.reduce((s,[,v])=>s+v.cost,0);
+  const catColors=['#3498db','#f39c12','#27ae60','#e74c3c','#9b59b6','#1abc9c','#e67e22','#34495e'];
+
+  if(aiC6)aiC6.destroy();
+  if(catArr.length>0){
+    aiC6=new Chart(document.getElementById('aiChartCostPie').getContext('2d'),{
+      type:'doughnut',data:{labels:catArr.map(([k])=>k),datasets:[{data:catArr.map(([,v])=>v.cost),backgroundColor:catColors.slice(0,catArr.length),borderWidth:0}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:12},padding:16}}}}
+    });
+  }
+  const ctb=document.getElementById('aiCostTable'); const cnd=document.getElementById('aiCostNoData');
+  if(catArr.length===0){ctb.innerHTML='';cnd.style.display='block';}
+  else{cnd.style.display='none'; ctb.innerHTML=catArr.map(([cat,v],i)=>`<tr><td style="font-weight:600"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${catColors[i]||'#999'};margin-right:6px"></span>${cat}</td><td>¥${v.cost.toLocaleString()}</td><td>${catTotal>0?(v.cost/catTotal*100).toFixed(1):'0'}%</td><td>${v.qty}</td><td>¥${v.qty>0?(v.cost/v.qty).toFixed(0):'0'}</td></tr>`).join('');}
+
+  // === TAB: AI Insights ===
+  const insights=[];
+  // Rule 1: Low margin products
+  pfArr.forEach(([sku,v])=>{ if(v.revenue>0&&v.grossMargin<15) insights.push({p:'high',icon:'⚠️',t:'毛利率预警',b:`${v.name} 的毛利率仅为 ${v.grossMargin.toFixed(1)}%，低于健康阈值(15%)。建议重新评估供应商定价或调整销售价格。`,d:`Gross margin of ${v.name} is ${v.grossMargin.toFixed(1)}%, below the 15% threshold.`}); });
+  // Rule 2: Loss products
+  pfArr.forEach(([sku,v])=>{ if(v.revenue>0&&v.grossProfit<0) insights.push({p:'high',icon:'🚨',t:'亏损产品',b:`${v.name} 处于亏损状态（毛利: ¥${v.grossProfit.toLocaleString()}）。需立即审查定价策略。`,d:`${v.name} is operating at a loss. Immediate pricing review required.`}); });
+  // Rule 3: Slow turnover
+  pfArr.forEach(([sku,v])=>{ if(v.inventoryValue>0){const tr=v.cogs/v.inventoryValue; if(tr<1) insights.push({p:'medium',icon:'🐌',t:'库存周转偏慢',b:`${v.name} 周转率仅 ${tr.toFixed(1)}x，库存积压 ${v.currentStock} 件（价值 ¥${v.inventoryValue.toLocaleString()}）。建议促销清仓或减少采购量。`,d:`${v.name} turnover is ${tr.toFixed(1)}x. Consider promotional pricing.`});}});
+  // Rule 4: C-class holding too much inventory
+  abcRows.forEach(r=>{const v=pf[r.sku]; if(r.cls==='c'&&v&&v.inventoryValue>0){const ivPct=totalInvValue>0?(v.inventoryValue/totalInvValue*100):0; if(ivPct>20) insights.push({p:'medium',icon:'📦',t:'C类商品库存占比过高',b:`${v.name} 为C类商品（营收占比仅${r.pct.toFixed(1)}%），但库存价值占总库存的 ${ivPct.toFixed(1)}%。建议减少补货。`,d:`Low-revenue product holds ${ivPct.toFixed(1)}% of total inventory value.`});}});
+  // Rule 5: Reorder alert
+  pfArr.forEach(([sku,v])=>{if(v.currentStock>0&&v.qtySold>0){const avgMonthlySales=v.qtySold; if(v.currentStock<avgMonthlySales) insights.push({p:'low',icon:'🔔',t:'补货提醒',b:`${v.name} 当前库存 ${v.currentStock} 件，低于历史出库量 ${v.qtySold} 件。建议补货 ${Math.ceil(avgMonthlySales*1.5-v.currentStock)} 件。`,d:`Stock of ${v.name} is below sales volume. Reorder suggested.`});}});
+  // Rule 6: High GMROI products
+  pfArr.forEach(([sku,v])=>{if(v.inventoryValue>0){const gm=v.grossProfit/v.inventoryValue; if(gm>2) insights.push({p:'positive',icon:'🌟',t:'高GMROI产品',b:`${v.name} 的GMROI达到 ${gm.toFixed(2)}，投资回报优秀。建议加大该产品的库存配置。`,d:`${v.name} has excellent GMROI of ${gm.toFixed(2)}. Consider increasing allocation.`});}});
+  // Rule 7: MoM growth
+  if(momGrowth>5) insights.push({p:'positive',icon:'📈',t:'销售增长',b:`本月销售额环比增长 ${momGrowth.toFixed(1)}%，增长势头良好。`,d:`Month-over-month sales growth of ${momGrowth.toFixed(1)}%.`});
+  else if(momGrowth<-5) insights.push({p:'high',icon:'📉',t:'销售下滑',b:`本月销售额环比下降 ${Math.abs(momGrowth).toFixed(1)}%，需关注市场变化和客户需求。`,d:`Sales declined ${Math.abs(momGrowth).toFixed(1)}% MoM. Review market trends.`});
+  // Rule 8: Overall margin health
+  if(overallMargin>=25) insights.push({p:'positive',icon:'💪',t:'毛利率健康',b:`整体毛利率 ${overallMargin.toFixed(1)}%，表现优秀（行业基准: 20-30%）。`,d:`Overall margin of ${overallMargin.toFixed(1)}% is above industry benchmark.`});
+  // Rule 9: Turnover health
+  if(turnoverRate>=4) insights.push({p:'positive',icon:'🚀',t:'周转率优秀',b:`整体库存周转率 ${turnoverRate.toFixed(1)}x，资金运转效率高。`,d:`Inventory turnover of ${turnoverRate.toFixed(1)}x indicates efficient cash flow.`});
+
+  // Sort: high > medium > low > positive
+  const pOrder={high:0,medium:1,low:2,positive:3};
+  insights.sort((a,b)=>pOrder[a.p]-pOrder[b.p]);
+
+  const iList=document.getElementById('aiInsightsList'); const iNone=document.getElementById('aiInsightsNoData');
+  if(insights.length===0){iList.innerHTML='';iNone.style.display='block';}
+  else{iNone.style.display='none';
+    iList.innerHTML=insights.map(ins=>`<div class="ai-insight-card ${ins.p}"><div class="insight-header"><div class="insight-title">${ins.icon} ${ins.t}</div><span class="insight-badge ${ins.p}">${{high:'高优先级',medium:'中优先级',low:'建议',positive:'正面'}[ins.p]}</span></div><div class="insight-body">${ins.b}</div><div class="insight-detail">${ins.d}</div></div>`).join('');
+  }
+
+  switchAITab('overview');
 }
 
 // ===== INIT =====
